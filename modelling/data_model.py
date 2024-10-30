@@ -12,6 +12,7 @@ class Data():
     def __init__(self,
                  X: np.ndarray,
                  df: pd.DataFrame) -> None:
+        pass
                  # This method will create the model for data
                  #This will be performed in second activity
 

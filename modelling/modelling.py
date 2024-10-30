@@ -2,6 +2,7 @@ from model.randomforest import RandomForest
 
 
 def model_predict(data, df, name):
+    pass
     # Here we need to call the methods related to the model e.g., random forest 
 
 
