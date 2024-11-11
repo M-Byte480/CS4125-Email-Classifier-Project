@@ -1,8 +1,5 @@
 from abc import ABC, abstractmethod
 
-import pandas as pd
-import numpy as np
-
 
 class BaseModel(ABC):
     def __init__(self) -> None:
