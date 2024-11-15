@@ -1,7 +1,8 @@
 from Config import Config
 
+# Singleton instance
 class ConfigurationManager:
-    instance = None  # Singleton instance
+    instance = None
 
     def __new__(cls):
         if cls.instance is None: # If instance is not created, create it
@@ -12,3 +13,4 @@ class ConfigurationManager:
 
     def get_config(self):
         return self.config
+

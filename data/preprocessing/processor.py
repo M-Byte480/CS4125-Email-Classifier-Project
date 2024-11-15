@@ -8,9 +8,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 
-from main import load_data
-
-
 class DataProcessor:
     def __init__(self):
         self.df = None
