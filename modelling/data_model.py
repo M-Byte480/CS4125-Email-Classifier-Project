@@ -13,25 +13,25 @@ class NaiveBayesClassifier(ClassificationStrategy):
     def classify(self, email: Email):
         # Logic
         print("Classifying with Naive Bayes")
-        return "spam"
+        return email.classification
 
 class SVMClassifier(ClassificationStrategy):
     def classify(self, email: Email):
         # Logic
         print("Classifying with SVM")
-        return "not spam"
+        return email.classification
 
 class DecisionTreeClassifier(ClassificationStrategy):
     def classify(self, email: Email):
         # Logic
         print("Classifying with Decision Tree")
-        return "spam"
+        return email.classification
 
 class RandomForestClassifier(ClassificationStrategy):
     def classify(self, email: Email):
         # Logic
         print("Classifying with Random Forest")
-        return "not spam"
+        return email.classification
 
 # Strategy Pattern
 # ClassificationContext is also a Subject that holds a list of Observers
