@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from observers.email_classification_observer import EmailClassificationObserver
 from structs.objects import Email
 
 # Strategy Pattern
@@ -33,19 +34,39 @@ class RandomForestClassifier(ClassificationStrategy):
         return "not spam"
 
 # Strategy Pattern
+# ClassificationContext is also a Subject that holds a list of Observers
 class ClassificationContext:
-    strategy: ClassificationStrategy
+    _strategy: ClassificationStrategy
+    _observers: [EmailClassificationObserver] # Array of subscribed observers
 
     def __init__(self, strategy: ClassificationStrategy) -> None:
         self._strategy = strategy
+        self._observers = []
 
     def set_strategy(self, strategy: ClassificationStrategy) -> None:
         """Allows switching the strategy dynamically."""
         self._strategy = strategy
 
     def classify_email(self, email: Email) -> str:
-        """Classifies an email using the current strategy."""
-        return self._strategy.classify(email)
+        """Classifies an email using the current strategy and notify observers."""
+        classification: str = self._strategy.classify(email)
+        self._notify_observers(classification)
+        return classification
+
+    def add_observer(self, observer: EmailClassificationObserver) -> None:
+        """Subscribe an observer to this subject."""
+        if observer not in self._observers:
+            self._observers.append(observer)
+
+    def remove_observer(self, observer: EmailClassificationObserver) -> None:
+        """Unsubscribe an observer from this subject."""
+        if observer in self._observers:
+            self._observers.remove(observer)
+
+    def _notify_observers(self, classification: str) -> None:
+        """Notify observers of a classification."""
+        for observer in self._observers:
+            observer.update(classification)
 
 # Factory Pattern
 class ClassificationContextFactory:
