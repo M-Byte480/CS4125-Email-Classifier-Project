@@ -1,36 +1,64 @@
-import numpy as np
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from Config import *
-from utils import *
-import random
-seed =0
-random.seed(seed)
-np.random.seed(seed)
+from abc import ABC, abstractmethod
 
-class Data():
-    def __init__(self,
-                 X: np.ndarray,
-                 df: pd.DataFrame) -> None:
-                 # This method will create the model for data
-                 #This will be performed in second activity
+from structs.objects import Email
 
+# Strategy Pattern
+class ClassificationStrategy(ABC):
+    @abstractmethod
+    def classify(self, email: Email):
+        pass
 
-    def get_type(self):
-        return  self.y
-    def get_X_train(self):
-        return  self.X_train
-    def get_X_test(self):
-        return  self.X_test
-    def get_type_y_train(self):
-        return  self.y_train
-    def get_type_y_test(self):
-        return  self.y_test
-    def get_train_df(self):
-        return  self.train_df
-    def get_embeddings(self):
-        return  self.embeddings
-    def get_type_test_df(self):
-        return  self.test_df
+class NaiveBayesClassifier(ClassificationStrategy):
+    def classify(self, email: Email):
+        # Logic
+        print("Classifying with Naive Bayes")
+        return "spam"
 
+class SVMClassifier(ClassificationStrategy):
+    def classify(self, email: Email):
+        # Logic
+        print("Classifying with SVM")
+        return "not spam"
 
+class DecisionTreeClassifier(ClassificationStrategy):
+    def classify(self, email: Email):
+        # Logic
+        print("Classifying with Decision Tree")
+        return "spam"
+
+class RandomForestClassifier(ClassificationStrategy):
+    def classify(self, email: Email):
+        # Logic
+        print("Classifying with Random Forest")
+        return "not spam"
+
+# Strategy Pattern
+class ClassificationContext:
+    strategy: ClassificationStrategy
+
+    def __init__(self, strategy: ClassificationStrategy) -> None:
+        self._strategy = strategy
+
+    def set_strategy(self, strategy: ClassificationStrategy) -> None:
+        """Allows switching the strategy dynamically."""
+        self._strategy = strategy
+
+    def classify_email(self, email: Email) -> str:
+        """Classifies an email using the current strategy."""
+        return self._strategy.classify(email)
+
+# Factory Pattern
+class ClassificationContextFactory:
+    @staticmethod
+    def create_context(strategy: str) -> ClassificationContext:
+        match strategy:
+            case "naive_bayes":
+                return ClassificationContext(NaiveBayesClassifier())
+            case "svm":
+                return ClassificationContext(SVMClassifier())
+            case "decision_tree":
+                return ClassificationContext(DecisionTreeClassifier())
+            case "random_forest":
+                return ClassificationContext(RandomForestClassifier())
+            case _:
+                raise ValueError("Invalid strategy")
