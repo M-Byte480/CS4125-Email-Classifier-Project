@@ -1,13 +1,16 @@
+import numpy as np
+
 from typing import override
 
 from observers.email_classification_observer import EmailClassificationObserver
-import numpy as np
 
+#StatisticsCollector keeps track of classification statistics for an email classifier.
 class StatisticsCollector(EmailClassificationObserver):
     _stats: dict[str, int]
 
     def __init__(self):
         self._stats = {"AppGallery": 0, "In-App Purchase": 0, "Unexpected Label": 0}
+        # todo: check back here after we decide how to deal with labels
 
     @override
     def update(self, classification: str) -> None:
@@ -15,7 +18,7 @@ class StatisticsCollector(EmailClassificationObserver):
 
     def display_stats(self) -> None:
         """Print out a report of collected statistics."""
-        total_stats_collected = np.sum(self._stats)
+        total_stats_collected = sum(self._stats.values())
         print(f"\nStatistics report:")
 
         for key, value in self._stats.items():
