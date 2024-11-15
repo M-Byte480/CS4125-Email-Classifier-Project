@@ -19,13 +19,13 @@ class StatisticsCollector(EmailClassificationObserver):
     def display_stats(self) -> None:
         """Print out a report of collected statistics."""
         total_stats_collected = sum(self._stats.values())
-        print(f"\nStatistics report:")
+        print(f"Statistics report:")
 
         for key, value in self._stats.items():
             percentage = np.round(value / total_stats_collected * 100, 2)
-            print(f"\n - {key}: {value} | {percentage}%")
+            print(f" - {key}: {value} | {percentage}%")
 
-        print(f"\nTotal stats collected: {total_stats_collected}")
+        print(f"Total stats collected: {total_stats_collected}")
 
 
     def _update_stats(self, classification: str) -> None:
