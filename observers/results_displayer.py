@@ -12,3 +12,14 @@ class ResultsDisplayer(EmailClassificationObserver):
     def _display(self, classification: str) -> None:
         """Print classification result."""
         print(f"\nEmail classification result: {classification}")
+
+class DisplayResultsCommand:
+    disp : ResultsDisplayer
+    classy : EmailClassificationObserver
+
+    def __init__(self, d: ResultsDisplayer, c : EmailClassificationObserver):
+        self.disp = d
+        self.classy = c
+
+    def execute(self):
+        self.disp.update(self.classy)
