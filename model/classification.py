@@ -2,6 +2,11 @@ from abc import ABC, abstractmethod
 
 from scipy.stats import studentized_range_gen
 
+from model.models.SVM import SVMModel
+from model.models.decisiontree import DecisionTreeModel
+from model.models.logistic_regression import LogisticRegressionModel
+from model.models.naive_bayes import NaiveBayesModel
+from model.models.randomforest import RandomForest
 from structs.objects import Email
 
 # Strategy Pattern
@@ -11,28 +16,49 @@ class ClassificationStrategy(ABC):
         pass
 
 class NaiveBayesClassifier(ClassificationStrategy):
-    def classify(self, email: Email):
-        # Logic
-        print("Classifying with Naive Bayes")
-        return "spam"
+    def __init__(self):
+        self.model = NaiveBayesModel()
+
+    def classify(self, email):
+        print(f"Classifying email: {email}")
+        prediction = self.model.predict([email])
+        return prediction
 
 class SVMClassifier(ClassificationStrategy):
+    def __init__(self):
+        self.model = SVMModel()
+
     def classify(self, email: Email):
-        # Logic
-        print("Classifying with SVM")
-        return "not spam"
+        print(f"Classifying email: {email}")
+        prediction = self.model.predict([email])
+        return prediction
 
 class DecisionTreeClassifier(ClassificationStrategy):
-    def classify(self, email: Email):
-        # Logic
-        print("Classifying with Decision Tree")
-        return "spam"
+    def __init__(self):
+        self.model = DecisionTreeModel()
+
+    def classify(self, email):
+        print(f"Classifying email: {email}")
+        prediction = self.model.predict([email])
+        return prediction
 
 class RandomForestClassifier(ClassificationStrategy):
+    def __init__(self):
+        self.model = RandomForest()
+
     def classify(self, email: Email):
-        # Logic
-        print("Classifying with Random Forest")
-        return "not spam"
+        print(f"Classifying email: {email}")
+        prediction = self.model.predict([email])
+        return prediction
+
+class LogisticRegressionClassifier(ClassificationStrategy):
+    def __init__(self):
+        self.model = LogisticRegressionModel()
+
+    def classify(self, email):
+        print(f"Classifying email: {email}")
+        prediction = self.model.predict([email])
+        return prediction
 
 # Strategy Pattern
 class ClassificationContext:
@@ -53,14 +79,17 @@ class ClassificationContext:
 class ClassificationContextFactory:
     @staticmethod
     def create_context(strategy: str) -> ClassificationContext:
-        match strategy:
-            case "naive_bayes":
-                return ClassificationContext(NaiveBayesClassifier())
-            case "svm":
-                return ClassificationContext(SVMClassifier())
-            case "decision_tree":
-                return ClassificationContext(DecisionTreeClassifier())
-            case "random_forest":
-                return ClassificationContext(RandomForestClassifier())
-            case _:
-                raise ValueError("Invalid strategy")
+        function_list = {
+            "naive_bayes": NaiveBayesClassifier,
+            "svm": SVMClassifier,
+            "decision_tree": DecisionTreeClassifier,
+            "random_forest": RandomForestClassifier,
+            "logistic_regression": LogisticRegressionClassifier
+        }
+
+        f = function_list.get(strategy)
+
+        if f:
+            return ClassificationContext(f())
+        else:
+            raise ValueError("Invalid strategy")

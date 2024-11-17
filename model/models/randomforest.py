@@ -1,8 +1,7 @@
-import numpy as np
 import pandas as pd
-from model.base import BaseModel
+from model.models.base import BaseModel
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report
 from numpy import *
 import random
 num_folds = 0
@@ -27,8 +26,11 @@ class RandomForest(BaseModel):
         self.predictions = None
         self.data_transform()
 
+    def train(self, X, y) -> None:
+        self.mdl = self.mdl.fit(X, y)
+
     def train(self, data) -> None:
-        self.mdl = self.mdl.fit(data.X_train, data.y_train)
+        self.train(data.X_train, data.y_train)
 
     def predict(self, X_test: pd.Series):
         predictions = self.mdl.predict(X_test)

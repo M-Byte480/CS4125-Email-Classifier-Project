@@ -10,7 +10,7 @@ class BaseModel(ABC):
 
 
     @abstractmethod
-    def train(self) -> None:
+    def train(self, X, y) -> None:
         """
         Train the model using ML Models for Multi-class and mult-label classification.
         :params: df is essential, others are model specific
@@ -19,14 +19,14 @@ class BaseModel(ABC):
         ...
 
     @abstractmethod
-    def predict(self) -> int:
+    def predict(self, X) -> int:
         """
 
         """
         ...
 
     @abstractmethod
-    def data_transform(self) -> None:
+    def data_transform(self, Z) -> None:
         return
 
     # def build(self, values) -> BaseModel:
