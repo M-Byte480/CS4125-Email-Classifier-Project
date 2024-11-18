@@ -8,26 +8,29 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 
+from Config import Config
+
+
 class DataProcessor:
+    PATH_TO_FILE = "AppGallery.csv"
+
     def __init__(self):
         self.df = None
-        self.load_data()
-        self.pre_process()
         tmp = self.translate_loaded_data()
         tmp = self.remove_noise(tmp)
         X, y = self.vectorize_data(tmp)
         data = self.split_and_balance_data(X, y)
         self.train(RandomForestClassifier(n_estimators=1000, random_state=0), data)
 
-
-    def load_data(self):
-        df = pd.read_csv("AppGallery.csv")
+    @staticmethod
+    def load_data():
+        df = pd.read_csv(DataProcessor.PATH_TO_FILE)
         print("Date Loaded", df.shape)
-        self.df = df
         return df
 
-    def pre_process(self):
-        df = self.df
+    @staticmethod
+    def pre_process(data_frame: pd.DataFrame):
+        df = data_frame
         # convert the dtype object to unicode string
         df['Interaction content'] = df['Interaction content'].values.astype('U')
         df['Ticket Summary'] = df['Ticket Summary'].values.astype('U')
@@ -44,26 +47,26 @@ class DataProcessor:
         # remove empty y
         df = df.loc[(df["y"] != '') & (~df["y"].isna()),]
         print("Preprocessing Data:", df.shape)
-        self.df = df
         return df
 
-    def translate_loaded_data(self):
-        df = self.df
-        temp = df
-        temp["ts"] = self.trans_to_en(temp["Ticket Summary"].to_list())
-        return temp
 
-    def remove_noise(self, temp):
+
+    @staticmethod
+    def de_duplication(data_frame):
+        pass
+
+    @staticmethod
+    def remove_noise(data_frame):
         ### Step 4: Noise Removal
         # remove re:
         # remove extrac white space
         # remove
         noise = "(sv\\s*:)|(wg\\s*:)|(ynt\\s*:)|(fw(d)?\\s*:)|(r\\s*:)|(re\\s*:)|(\\[|\\])|(aspiegel support issue submit)|(null)|(nan)|((bonus place my )?support.pt 自动回复:)"
-        temp["ts"] = temp["ts"].str.lower().replace(noise, " ", regex=True).replace(r'\\s+', ' ',
-                                                                                    regex=True).str.strip()
-        temp_debug = temp.loc[:, ["Ticket Summary", "ts", "y"]]
+        data_frame["ts"] = data_frame["ts"].str.lower().replace(noise, " ", regex=True).replace(r'\\s+', ' ',
+                                                                                                regex=True).str.strip()
+        temp_debug = data_frame.loc[:, ["Ticket Summary", "ts", "y"]]
 
-        temp["ic"] = temp["Interaction content"].str.lower()
+        data_frame["ic"] = data_frame["Interaction content"].str.lower()
         noise_1 = [
             "(from :)|(subject :)|(sent :)|(r\\s*:)|(re\\s*:)",
             "(january|february|march|april|may|june|july|august|september|october|november|december)",
@@ -107,15 +110,15 @@ class DataProcessor:
             "(\\s|^).(\\s|$)"]
         for noise in noise_1:
             # print(noise)
-            temp["ic"] = temp["ic"].replace(noise, " ", regex=True)
-        temp["ic"] = temp["ic"].replace(r'\\s+', ' ', regex=True).str.strip()
-        temp_debug = temp.loc[:, ["Interaction content", "ic", "y"]]
+            data_frame["ic"] = data_frame["ic"].replace(noise, " ", regex=True)
+        data_frame["ic"] = data_frame["ic"].replace(r'\\s+', ' ', regex=True).str.strip()
+        temp_debug = data_frame.loc[:, ["Interaction content", "ic", "y"]]
 
         # print(temp.y1.value_counts())
-        good_y1 = temp.y1.value_counts()[temp.y1.value_counts() > 10].index
-        temp = temp.loc[temp.y1.isin(good_y1)]
+        good_y1 = data_frame.y1.value_counts()[data_frame.y1.value_counts() > 10].index
+        data_frame = data_frame.loc[data_frame.y1.isin(good_y1)]
         # print(temp.shape)
-        return temp
+        return data_frame
 
     def vectorize_data(self, temp):
         ## Step 6: Textual data numerically:
@@ -159,8 +162,15 @@ class DataProcessor:
         print(confusion_matrix(y_test, y_pred))
         print(classification_report(y_test, y_pred))
 
+    @staticmethod
+    def translate_loaded_data(data_frame):
+        temp = data_frame
+        temp[Config.TICKET_SUMMARY] = self.trans_to_en(temp["Ticket Summary"].to_list())
+        return temp
+
     # Translation
-    def trans_to_en(self, texts):
+    @staticmethod
+    def trans_to_en(texts):
         t2t_m = "facebook/m2m100_418M"
         t2t_pipe = pipeline(task='text2text-generation', model=t2t_m)
 
