@@ -32,6 +32,11 @@ def get_data_object(X: np.ndarray, df: pd.DataFrame):
 
 def perform_modelling(data: Data, df: pd.DataFrame, name):
     model_predict(data, df, name)
+
+def classification_context(classification_strategy: str):
+    classification_context = ClassificationContextFactory.create_context(classification_strategy)
+    return classification_context
+
 # Code will start executing from following line
 if __name__ == '__main__':
     
@@ -43,6 +48,8 @@ if __name__ == '__main__':
     
     # data transformation
     X, group_df = get_embeddings(df)
+    logistic_model = classification_context('logistic_regression')
+
     # data modelling
     data = get_data_object(X, df)
     # modelling

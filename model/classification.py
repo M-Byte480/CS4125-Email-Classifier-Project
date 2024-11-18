@@ -9,12 +9,15 @@ from model.models.naive_bayes import NaiveBayesModel
 from model.models.randomforest import RandomForest
 from structs.objects import Email
 
-# Strategy Pattern
+
+# Strategy Pattern - Interface
 class ClassificationStrategy(ABC):
     @abstractmethod
     def classify(self, email: Email):
         pass
 
+
+# Strategy Pattern - Concrete Classes
 class NaiveBayesClassifier(ClassificationStrategy):
     def __init__(self):
         self.model = NaiveBayesModel()
@@ -23,6 +26,7 @@ class NaiveBayesClassifier(ClassificationStrategy):
         print(f"Classifying email: {email}")
         prediction = self.model.predict([email])
         return prediction
+
 
 class SVMClassifier(ClassificationStrategy):
     def __init__(self):
@@ -33,6 +37,7 @@ class SVMClassifier(ClassificationStrategy):
         prediction = self.model.predict([email])
         return prediction
 
+
 class DecisionTreeClassifier(ClassificationStrategy):
     def __init__(self):
         self.model = DecisionTreeModel()
@@ -41,6 +46,7 @@ class DecisionTreeClassifier(ClassificationStrategy):
         print(f"Classifying email: {email}")
         prediction = self.model.predict([email])
         return prediction
+
 
 class RandomForestClassifier(ClassificationStrategy):
     def __init__(self):
@@ -51,6 +57,7 @@ class RandomForestClassifier(ClassificationStrategy):
         prediction = self.model.predict([email])
         return prediction
 
+
 class LogisticRegressionClassifier(ClassificationStrategy):
     def __init__(self):
         self.model = LogisticRegressionModel()
@@ -60,7 +67,8 @@ class LogisticRegressionClassifier(ClassificationStrategy):
         prediction = self.model.predict([email])
         return prediction
 
-# Strategy Pattern
+
+# Strategy Pattern - Context
 class ClassificationContext:
     strategy: ClassificationStrategy
 
@@ -75,11 +83,12 @@ class ClassificationContext:
         """Classifies an email using the current strategy."""
         return self._strategy.classify(email)
 
-# Factory Pattern
+
+# Factory Pattern - Context Factory
 class ClassificationContextFactory:
     @staticmethod
     def create_context(strategy: str) -> ClassificationContext:
-        function_list = {
+        constructor_selector = {
             "naive_bayes": NaiveBayesClassifier,
             "svm": SVMClassifier,
             "decision_tree": DecisionTreeClassifier,
@@ -87,9 +96,9 @@ class ClassificationContextFactory:
             "logistic_regression": LogisticRegressionClassifier
         }
 
-        f = function_list.get(strategy)
+        constructor = constructor_selector.get(strategy)
 
-        if f:
-            return ClassificationContext(f())
+        if constructor:
+            return ClassificationContext(constructor())
         else:
             raise ValueError("Invalid strategy")
