@@ -7,6 +7,7 @@ from embedding import get_tfidf_embd
 from modelling.modelling import *
 from modelling.data_model import *
 import random
+import os
 import pandas as pd
 seed =0
 random.seed(seed)
@@ -17,8 +18,13 @@ def load_data(file_path):
     #load the input data
     return DataProcessor.load_data(file_path)
 
-# TODO: add load if saved
-# TODO: Save if not saved
+def save_data(file_path, data):
+    return DataProcessor.save_data(file_path, data)
+
+def exists_file(file_path) -> bool:
+    """Checks if the specified file exists"""
+    return os.path.isfile(file_path)
+
 def preprocess_data(data_frame):
     # De-duplicate input data
     data_frame =  DataProcessor.de_duplication(data_frame)
@@ -47,8 +53,12 @@ def classification_context(classification_strategy: str):
 if __name__ == '__main__':
     
     # pre-processing steps
-    data_frame = load_data(DataProcessor.PATH_TO_APP)
-    data_frame = preprocess_data(data_frame)
+    if exists_file(DataProcessor.PATH_TO_APP_PREPROCESSED):
+        load_data(DataProcessor.PATH_TO_APP_PREPROCESSED)
+    else:
+        data_frame = load_data(DataProcessor.PATH_TO_APP)
+        data_frame = preprocess_data(data_frame)
+        save_data(data_frame, DataProcessor.PATH_TO_APP_PREPROCESSED)
 
     data_frame[Config.INTERACTION_CONTENT] = data_frame[Config.INTERACTION_CONTENT].values.astype('U')
     data_frame[Config.TICKET_SUMMARY] = data_frame[Config.TICKET_SUMMARY].values.astype('U')

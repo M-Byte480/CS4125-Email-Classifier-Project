@@ -7,13 +7,14 @@ from transformers import M2M100ForConditionalGeneration, M2M100Tokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-import os
 from Config import Config
 
 
 class DataProcessor:
-    PATH_TO_APP = "data/AppGallery.csv"
-    PATH_TO_PURCHASES = "data/Purchasing.csv"
+    PATH_TO_APP = "../data/AppGallery.csv"
+    PATH_TO_PURCHASES = "../data/Purchasing.csv"
+    PATH_TO_APP_PREPROCESSED = "../data/AppGalleryPreprocessed.csv"
+    PATH_TO_PURCHASES_PREPROCESSED = "../data/PurchasingPreprocessed.csv"
 
     def __init__(self):
         self.df = None
@@ -24,8 +25,14 @@ class DataProcessor:
 
     @staticmethod
     def load_data(file_path):
+        """Loads the data from the specified location"""
         df = pd.read_csv(file_path)
         return df
+
+    @staticmethod
+    def save_data(file_path, df):
+        """Saves the data to a specified location"""
+        df.to_csv(file_path, index=False)
 
     @staticmethod
     def pre_process(data_frame: pd.DataFrame):
