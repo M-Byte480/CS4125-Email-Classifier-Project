@@ -7,25 +7,24 @@ from transformers import M2M100ForConditionalGeneration, M2M100Tokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-
+import os
 from Config import Config
 
 
 class DataProcessor:
-    PATH_TO_FILE = "AppGallery.csv"
+    PATH_TO_APP = "data/AppGallery.csv"
+    PATH_TO_PURCHASES = "data/Purchasing.csv"
 
     def __init__(self):
         self.df = None
-        tmp = self.translate_loaded_data()
         tmp = self.remove_noise(tmp)
         X, y = self.vectorize_data(tmp)
         data = self.split_and_balance_data(X, y)
         self.train(RandomForestClassifier(n_estimators=1000, random_state=0), data)
 
     @staticmethod
-    def load_data():
-        df = pd.read_csv(DataProcessor.PATH_TO_FILE)
-        print("Date Loaded", df.shape)
+    def load_data(file_path):
+        df = pd.read_csv(file_path)
         return df
 
     @staticmethod
@@ -53,7 +52,16 @@ class DataProcessor:
 
     @staticmethod
     def de_duplication(data_frame):
-        pass
+        # Remove all rows with duplicates
+        df_no_duplicates = data_frame[~data_frame.duplicated(subset="Interaction id", keep=False)]
+
+        print(data_frame.shape[0] - df_no_duplicates.shape[0], "Rows removed due to duplicates and incorrect labelling")
+        return df_no_duplicates
+
+    @staticmethod
+    def replace_nan_interaction_summary(data_frame):
+        data_frame[Config.TICKET_SUMMARY].fillna("", inplace=True)
+        return data_frame
 
     @staticmethod
     def remove_noise(data_frame):
@@ -163,10 +171,10 @@ class DataProcessor:
         print(classification_report(y_test, y_pred))
 
     @staticmethod
-    def translate_loaded_data(data_frame):
-        temp = data_frame
-        temp[Config.TICKET_SUMMARY] = self.trans_to_en(temp["Ticket Summary"].to_list())
-        return temp
+    def translate_data_frame(data_frame):
+        data_frame[Config.INTERACTION_CONTENT] = DataProcessor.trans_to_en(data_frame[Config.INTERACTION_CONTENT].to_list())
+        data_frame[Config.TICKET_SUMMARY] = DataProcessor.trans_to_en(data_frame[Config.TICKET_SUMMARY].to_list())
+        return data_frame
 
     # Translation
     @staticmethod
@@ -176,46 +184,44 @@ class DataProcessor:
 
         model = M2M100ForConditionalGeneration.from_pretrained(t2t_m)
         tokenizer = M2M100Tokenizer.from_pretrained(t2t_m)
-        nlp_stanza = stanza.Pipeline(lang="multilingual", processors="langid",
+        nlp_stanza = stanza.Pipeline(lang="multilingual",
+                                     processors="langid",
                                      download_method=DownloadMethod.REUSE_RESOURCES)
+        language_map = {
+            "fro": "fr",  # Old French
+            "la": "it",  # Latin
+            "nn": "no",  # Norwegian (Nynorsk)
+            "kmr": "tr",  # Kurmanji
+            "mt": "pl"   # maltese to polish because there is no maltese (in the dataset or the model)
+        }
 
         text_en_l = []
         for text in texts:
+            # Empty strings get appended
             if text == "":
-                text_en_l = text_en_l + [text]
+                text_en_l.append("")
                 continue
-
+            
             doc = nlp_stanza(text)
-            # print(doc.lang)
-            if doc.lang == "en":
-                text_en_l = text_en_l + [text]
-            else:
-                lang = doc.lang
-                if lang == "fro":  # fro = Old French
-                    lang = "fr"
-                elif lang == "la":  # latin
-                    lang = "it"
-                elif lang == "nn":  # Norwegian (Nynorsk)
-                    lang = "no"
-                elif lang == "kmr":  # Kurmanji
-                    lang = "tr"
+            detected_lang = doc.lang
 
-                case = 2
+            # If language is english append
+            if detected_lang == "en":
+                text_en_l.append(text)
+                continue
+            # Detected lang
+            detected_lang = language_map.get(detected_lang, detected_lang)
 
-                if case == 1:
-                    text_en = t2t_pipe(text, forced_bos_token_id=t2t_pipe.tokenizer.get_lang_id(lang='en'))
-                    text_en = text_en[0]['generated_text']
-                elif case == 2:
-                    tokenizer.src_lang = lang
-                    encoded_hi = tokenizer(text, return_tensors="pt")
-                    generated_tokens = model.generate(**encoded_hi, forced_bos_token_id=tokenizer.get_lang_id("en"))
-                    text_en = tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)
-                    text_en = text_en[0]
-                else:
-                    text_en = text
 
-                text_en_l = text_en_l + [text_en]
-                # print(text)
-                # print(text_en)
+            tokenizer.src_lang = detected_lang
+            encoded_hi = tokenizer(text, return_tensors="pt")
+            generated_tokens = model.generate(
+                **encoded_hi,
+                forced_bos_token_id=tokenizer.get_lang_id("en")
+            )
+            text_en = tokenizer.decode(generated_tokens[0], skip_special_tokens=True)
+
+            text_en_l.append(text_en)
+
 
         return text_en_l

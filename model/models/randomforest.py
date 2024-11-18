@@ -2,7 +2,7 @@ import pandas as pd
 from model.models.base import BaseModel
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report
-from numpy import *
+import numpy as np
 import random
 num_folds = 0
 seed =0
@@ -17,7 +17,7 @@ class RandomForest(BaseModel):
     def __init__(self,
                  model_name: str,
                  embeddings: np.ndarray,
-                 y: np.ndarray) -> None:
+                 yb: np.ndarray) -> None:
         super(RandomForest, self).__init__()
         self.model_name = model_name
         self.embeddings = embeddings

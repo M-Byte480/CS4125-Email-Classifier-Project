@@ -3,38 +3,40 @@ import numpy as np
 
 from Config import Config
 from data.preprocessing.processor import DataProcessor
+from embedding import get_tfidf_embd
 from modelling.modelling import *
 from modelling.data_model import *
 import random
+import pandas as pd
 seed =0
 random.seed(seed)
 np.random.seed(seed)
 
 
-def load_data():
+def load_data(file_path):
     #load the input data
-    return DataProcessor.load_data()
+    return DataProcessor.load_data(file_path)
 
-
+# TODO: add load if saved
+# TODO: Save if not saved
 def preprocess_data(data_frame):
     # De-duplicate input data
     data_frame =  DataProcessor.de_duplication(data_frame)
+    data_frame = DataProcessor.replace_nan_interaction_summary(data_frame)
     # Translate
-    data_frame = DataProcessor.translate_loaded_data(data_frame)
+    data_frame = DataProcessor.translate_data_frame(data_frame)
     # remove noise in input data
     data_frame = DataProcessor.remove_noise(data_frame)
-    # translate data to english
-    data_frame[Config.TICKET_SUMMARY] = translate_to_en(data_frame[Config.TICKET_SUMMARY].tolist())
     return data_frame
 
-def get_embeddings(df:pd.DataFrame):
+def get_embeddings(df:pd.DataFrame, text_column: str = Config.INTERACTION_CONTENT):
     X = get_tfidf_embd(df)  # get tf-idf embeddings
     return X, df
 
 def get_data_object(X: np.ndarray, df: pd.DataFrame):
-    return Data(X, df)
+    return extract_classifications(X, df)
 
-def perform_modelling(data: Data, df: pd.DataFrame, name):
+def perform_modelling(data, df: pd.DataFrame, name):
     model_predict(data, df, name)
 
 def classification_context(classification_strategy: str):
@@ -45,17 +47,21 @@ def classification_context(classification_strategy: str):
 if __name__ == '__main__':
     
     # pre-processing steps
-    data_frame = load_data()
+    data_frame = load_data(DataProcessor.PATH_TO_APP)
     data_frame = preprocess_data(data_frame)
+
     data_frame[Config.INTERACTION_CONTENT] = data_frame[Config.INTERACTION_CONTENT].values.astype('U')
     data_frame[Config.TICKET_SUMMARY] = data_frame[Config.TICKET_SUMMARY].values.astype('U')
-    
+
+
     # data transformation
-    X, group_df = get_embeddings(data_frame)
+    X_IS, group_df = get_embeddings(data_frame, Config.INTERACTION_CONTENT)
+
     logistic_model = classification_context('logistic_regression')
 
     # data modelling
-    data = get_data_object(X, data_frame)
+    data = get_data_object(X_IS, data_frame)
     # modelling
     perform_modelling(data, data_frame, 'name')
+    # """
 
