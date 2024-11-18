@@ -2,7 +2,7 @@
 import numpy as np
 
 from Config import Config
-from data.preprocessing.processor import DataProcessor
+from preprocessing.processor import DataProcessor
 from embedding import get_tfidf_embd
 from modelling.modelling import *
 from modelling.data_model import *
