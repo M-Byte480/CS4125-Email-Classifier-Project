@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
-
-from scipy.stats import studentized_range_gen
+from typing import override
 
 from model.models.SVM import SVMModel
 from model.models.decisiontree import DecisionTreeModel
@@ -9,80 +8,76 @@ from model.models.naive_bayes import NaiveBayesModel
 from model.models.randomforest import RandomForest
 from structs.objects import Email
 
-
 # Strategy Pattern - Interface
-class ClassificationStrategy(ABC):
+class IClassificationStrategy(ABC):
+    @abstractmethod
+    def train(self, X, y):
+        pass
     @abstractmethod
     def classify(self, email: Email):
         pass
 
+# Parent Classification Classes
+class Classifier(IClassificationStrategy, ABC):
+    __slots__ = ('model',)
 
-# Strategy Pattern - Concrete Classes
-class NaiveBayesClassifier(ClassificationStrategy):
     def __init__(self):
+        self.model = None
+
+    @override
+    def train(self, X, y):
+        self.model.train(X, y)
+
+    @override
+    def classify(self, email) -> str:
+        print(f"Classifying email: {email}")
+        prediction = self.model.predict([email])
+        return prediction
+
+# Strategy Pattern - Concrete Classification Classes
+class NaiveBayesClassifier(Classifier):
+    def __init__(self):
+        super().__init__()
         self.model = NaiveBayesModel()
 
-    def classify(self, email):
-        print(f"Classifying email: {email}")
-        prediction = self.model.predict([email])
-        return prediction
-
-
-class SVMClassifier(ClassificationStrategy):
+class SVMClassifier(Classifier):
     def __init__(self):
+        super().__init__()
         self.model = SVMModel()
 
-    def classify(self, email: Email):
-        print(f"Classifying email: {email}")
-        prediction = self.model.predict([email])
-        return prediction
-
-
-class DecisionTreeClassifier(ClassificationStrategy):
+class DecisionTreeClassifier(Classifier):
     def __init__(self):
+        super().__init__()
         self.model = DecisionTreeModel()
 
-    def classify(self, email):
-        print(f"Classifying email: {email}")
-        prediction = self.model.predict([email])
-        return prediction
-
-
-class RandomForestClassifier(ClassificationStrategy):
+class RandomForestClassifier(Classifier):
     def __init__(self):
+        super().__init__()
         self.model = RandomForest()
 
-    def classify(self, email: Email):
-        print(f"Classifying email: {email}")
-        prediction = self.model.predict([email])
-        return prediction
-
-
-class LogisticRegressionClassifier(ClassificationStrategy):
+class LogisticRegressionClassifier(Classifier):
     def __init__(self):
+        super().__init__()
         self.model = LogisticRegressionModel()
-
-    def classify(self, email):
-        print(f"Classifying email: {email}")
-        prediction = self.model.predict([email])
-        return prediction
-
 
 # Strategy Pattern - Context
 class ClassificationContext:
-    strategy: ClassificationStrategy
+    strategy: Classifier
 
-    def __init__(self, strategy: ClassificationStrategy) -> None:
+    def __init__(self, strategy: Classifier) -> None:
         self._strategy = strategy
 
-    def set_strategy(self, strategy: ClassificationStrategy) -> None:
+    def set_strategy(self, strategy: Classifier) -> None:
         """Allows switching the strategy dynamically."""
         self._strategy = strategy
+
+    def train_model(self, X, y):
+        """Trains a model using the classification strategy"""
+        self._strategy.train(X, y)
 
     def classify_email(self, email: Email) -> str:
         """Classifies an email using the current strategy."""
         return self._strategy.classify(email)
-
 
 # Factory Pattern - Context Factory
 class ClassificationContextFactory:
