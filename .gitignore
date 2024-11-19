@@ -1,0 +1,6 @@
+.idea
+.idea/*
+.env
+# Dont ask about this
+instagram.py
+vcs.xml

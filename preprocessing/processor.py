@@ -7,63 +7,72 @@ from transformers import M2M100ForConditionalGeneration, M2M100Tokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
+from Config import Config
+
 
 class DataProcessor:
+    PATH_TO_APP = "data/AppGallery.csv"
+    PATH_TO_PURCHASES = "data/Purchasing.csv"
+    PATH_TO_APP_PREPROCESSED = "data/AppGalleryPreprocessed.csv"
+    PATH_TO_PURCHASES_PREPROCESSED = "data/PurchasingPreprocessed.csv"
+
     def __init__(self):
-        self.df = None
-        self.load_data()
-        self.pre_process()
-        tmp = self.translate_loaded_data()
-        tmp = self.remove_noise(tmp)
-        X, y = self.vectorize_data(tmp)
         data = self.split_and_balance_data(X, y)
         self.train(RandomForestClassifier(n_estimators=1000, random_state=0), data)
 
-
-    def load_data(self):
-        df = pd.read_csv("AppGallery.csv")
-        print("Date Loaded", df.shape)
-        self.df = df
+    @staticmethod
+    def load_data(file_path):
+        """Loads the data from the specified location"""
+        df = pd.read_csv(file_path)
         return df
 
-    def pre_process(self):
-        df = self.df
+    @staticmethod
+    def save_data(file_path, df):
+        """Saves the data to a specified location"""
+        df.to_csv(file_path, index=False)
+
+    @staticmethod
+    def renaming_cols(data_frame: pd.DataFrame):
+        df = data_frame
         # convert the dtype object to unicode string
-        df['Interaction content'] = df['Interaction content'].values.astype('U')
-        df['Ticket Summary'] = df['Ticket Summary'].values.astype('U')
+        df[Config.TICKET_SUMMARY] = df[Config.TICKET_SUMMARY].values.astype('U')
+        df[Config.INTERACTION_CONTENT] = df[Config.INTERACTION_CONTENT].values.astype('U')
 
-        # Optional: rename variable names for remebering easily
-        df["y1"] = df["Type 1"]
-        df["y2"] = df["Type 2"]
-        df["y3"] = df["Type 3"]
-        df["y4"] = df["Type 4"]
-        df["x"] = df['Interaction content']
+        # Optional: rename variable names for remembering easily
+        df["y1"] = df[Config.GROUPED]
+        df["y2"] = df[Config.CLASS_COL]
+        df["y3"] = df[Config.TYPE_COLS[0]]
+        df["y4"] = df[Config.TYPE_COLS[1]]
+        df["x_ic"] = df[Config.INTERACTION_CONTENT]
+        df["x_ts"] = df[Config.TICKET_SUMMARY]
 
-        df["y"] = df["y2"]
-
-        # remove empty y
-        df = df.loc[(df["y"] != '') & (~df["y"].isna()),]
-        print("Preprocessing Data:", df.shape)
-        self.df = df
         return df
 
-    def translate_loaded_data(self):
-        df = self.df
-        temp = df
-        temp["ts"] = self.trans_to_en(temp["Ticket Summary"].to_list())
-        return temp
 
-    def remove_noise(self, temp):
+
+    @staticmethod
+    def de_duplication(data_frame):
+        # Remove all rows with duplicates
+        df_no_duplicates = data_frame[~data_frame.duplicated(subset="Interaction id", keep=False)]
+
+        print(data_frame.shape[0] - df_no_duplicates.shape[0], "Rows removed due to duplicates and incorrect labelling")
+        return df_no_duplicates
+
+    @staticmethod
+    def replace_nan_interaction_summary(data_frame):
+        data_frame[Config.TICKET_SUMMARY].fillna("", inplace=True)
+        return data_frame
+
+    @staticmethod
+    def remove_noise(data_frame):
         ### Step 4: Noise Removal
         # remove re:
         # remove extrac white space
         # remove
         noise = "(sv\\s*:)|(wg\\s*:)|(ynt\\s*:)|(fw(d)?\\s*:)|(r\\s*:)|(re\\s*:)|(\\[|\\])|(aspiegel support issue submit)|(null)|(nan)|((bonus place my )?support.pt 自动回复:)"
-        temp["ts"] = temp["ts"].str.lower().replace(noise, " ", regex=True).replace(r'\\s+', ' ',
-                                                                                    regex=True).str.strip()
-        temp_debug = temp.loc[:, ["Ticket Summary", "ts", "y"]]
+        data_frame["x_ts"] = data_frame["x_ts"].str.lower().replace(noise, " ", regex=True).replace(r'\\s+', ' ', regex=True).str.strip()
 
-        temp["ic"] = temp["Interaction content"].str.lower()
+        data_frame["x_ic"] = data_frame["x_ic"].str.lower()
         noise_1 = [
             "(from :)|(subject :)|(sent :)|(r\\s*:)|(re\\s*:)",
             "(january|february|march|april|may|june|july|august|september|october|november|december)",
@@ -107,24 +116,26 @@ class DataProcessor:
             "(\\s|^).(\\s|$)"]
         for noise in noise_1:
             # print(noise)
-            temp["ic"] = temp["ic"].replace(noise, " ", regex=True)
-        temp["ic"] = temp["ic"].replace(r'\\s+', ' ', regex=True).str.strip()
-        temp_debug = temp.loc[:, ["Interaction content", "ic", "y"]]
+            data_frame["x_ic"] = data_frame["x_ic"].replace(noise, " ", regex=True)
+        data_frame["x_ic"] = data_frame["x_ic"].replace(r'\\s+', ' ', regex=True).str.strip()
 
-        # print(temp.y1.value_counts())
-        good_y1 = temp.y1.value_counts()[temp.y1.value_counts() > 10].index
-        temp = temp.loc[temp.y1.isin(good_y1)]
-        # print(temp.shape)
-        return temp
+        return data_frame
 
-    def vectorize_data(self, temp):
+    @staticmethod
+    def vectorize_data(data_frame):
         ## Step 6: Textual data numerically:
         tfidfconverter = TfidfVectorizer(max_features=2000, min_df=4, max_df=0.90)
-        x1 = tfidfconverter.fit_transform(temp["Interaction content"]).toarray()
-        x2 = tfidfconverter.fit_transform(temp["ts"]).toarray()
-        X = np.concatenate((x1, x2), axis=1)
+        x_ic = tfidfconverter.fit_transform(data_frame["x_ic"]).toarray()
+        x_ts = tfidfconverter.fit_transform(data_frame["x_ts"]).toarray()
+        X = np.concatenate((x_ic, x_ts), axis=1)
         # remove bad test cases from test dataset
-        y = temp.y.to_numpy()
+        # convert the 4 labels in to an array of labels
+        y = list()
+        y.append(data_frame["y1"].to_numpy())
+        y.append(data_frame["y2"].to_numpy())
+        y.append(data_frame["y3"].to_numpy())
+        y.append(data_frame["y4"].to_numpy())
+
         return X, y
 
     def split_and_balance_data(X, y, test_size=0.2, min_class_samples=3):
@@ -159,53 +170,58 @@ class DataProcessor:
         print(confusion_matrix(y_test, y_pred))
         print(classification_report(y_test, y_pred))
 
+    @staticmethod
+    def translate_data_frame(data_frame):
+        data_frame[Config.INTERACTION_CONTENT] = DataProcessor.trans_to_en(data_frame[Config.INTERACTION_CONTENT].to_list())
+        data_frame[Config.TICKET_SUMMARY] = DataProcessor.trans_to_en(data_frame[Config.TICKET_SUMMARY].to_list())
+        return data_frame
+
     # Translation
-    def trans_to_en(self, texts):
+    @staticmethod
+    def trans_to_en(texts):
         t2t_m = "facebook/m2m100_418M"
         t2t_pipe = pipeline(task='text2text-generation', model=t2t_m)
 
         model = M2M100ForConditionalGeneration.from_pretrained(t2t_m)
         tokenizer = M2M100Tokenizer.from_pretrained(t2t_m)
-        nlp_stanza = stanza.Pipeline(lang="multilingual", processors="langid",
+        nlp_stanza = stanza.Pipeline(lang="multilingual",
+                                     processors="langid",
                                      download_method=DownloadMethod.REUSE_RESOURCES)
+        language_map = {
+            "fro": "fr",  # Old French
+            "la": "it",  # Latin
+            "nn": "no",  # Norwegian (Nynorsk)
+            "kmr": "tr",  # Kurmanji
+            "mt": "pl"   # maltese to polish because there is no maltese (in the dataset or the model)
+        }
 
         text_en_l = []
         for text in texts:
+            # Empty strings get appended
             if text == "":
-                text_en_l = text_en_l + [text]
+                text_en_l.append("")
                 continue
-
+            
             doc = nlp_stanza(text)
-            # print(doc.lang)
-            if doc.lang == "en":
-                text_en_l = text_en_l + [text]
-            else:
-                lang = doc.lang
-                if lang == "fro":  # fro = Old French
-                    lang = "fr"
-                elif lang == "la":  # latin
-                    lang = "it"
-                elif lang == "nn":  # Norwegian (Nynorsk)
-                    lang = "no"
-                elif lang == "kmr":  # Kurmanji
-                    lang = "tr"
+            detected_lang = doc.lang
 
-                case = 2
+            # If language is english append
+            if detected_lang == "en":
+                text_en_l.append(text)
+                continue
+            # Detected lang
+            detected_lang = language_map.get(detected_lang, detected_lang)
 
-                if case == 1:
-                    text_en = t2t_pipe(text, forced_bos_token_id=t2t_pipe.tokenizer.get_lang_id(lang='en'))
-                    text_en = text_en[0]['generated_text']
-                elif case == 2:
-                    tokenizer.src_lang = lang
-                    encoded_hi = tokenizer(text, return_tensors="pt")
-                    generated_tokens = model.generate(**encoded_hi, forced_bos_token_id=tokenizer.get_lang_id("en"))
-                    text_en = tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)
-                    text_en = text_en[0]
-                else:
-                    text_en = text
 
-                text_en_l = text_en_l + [text_en]
-                # print(text)
-                # print(text_en)
+            tokenizer.src_lang = detected_lang
+            encoded_hi = tokenizer(text, return_tensors="pt")
+            generated_tokens = model.generate(
+                **encoded_hi,
+                forced_bos_token_id=tokenizer.get_lang_id("en")
+            )
+            text_en = tokenizer.decode(generated_tokens[0], skip_special_tokens=True)
+
+            text_en_l.append(text_en)
+
 
         return text_en_l
