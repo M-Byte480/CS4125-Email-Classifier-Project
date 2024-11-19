@@ -50,23 +50,27 @@ def classification_context(classification_strategy: str):
     return classification_context
 
 # Code will start executing from following line
+# todo: for each label for each model train and store best for each label then add check if models already exist
 def get_classifications(data_frame):
+    pass
 
-
+def extract_training_data(data_frame):
+    return DataProcessor.vectorize_data(data_frame)
 
 if __name__ == '__main__':
     
     # pre-processing steps
     if exists_file(DataProcessor.PATH_TO_APP_PREPROCESSED):
         data_frame = load_data(DataProcessor.PATH_TO_APP_PREPROCESSED)
+        X, y = extract_training_data(data_frame)
     else:
         data_frame = load_data(DataProcessor.PATH_TO_APP)
+        data_frame = DataProcessor.renaming_cols(data_frame)
         data_frame = preprocess_data(data_frame)
+        X, y = extract_training_data(data_frame)
         save_data(data_frame, DataProcessor.PATH_TO_APP_PREPROCESSED)
 
-
     # data transformation
-    data_frame = DataProcessor.pre_process(data_frame)
 
     logistic_model = classification_context('logistic_regression')
     svm_model = classification_context('svm')

@@ -17,9 +17,6 @@ class DataProcessor:
     PATH_TO_PURCHASES_PREPROCESSED = "data/PurchasingPreprocessed.csv"
 
     def __init__(self):
-        self.df = None
-        tmp = self.remove_noise(tmp)
-        X, y = self.vectorize_data(tmp)
         data = self.split_and_balance_data(X, y)
         self.train(RandomForestClassifier(n_estimators=1000, random_state=0), data)
 
@@ -35,21 +32,20 @@ class DataProcessor:
         df.to_csv(file_path, index=False)
 
     @staticmethod
-    def pre_process(data_frame: pd.DataFrame):
+    def renaming_cols(data_frame: pd.DataFrame):
         df = data_frame
         # convert the dtype object to unicode string
         df[Config.TICKET_SUMMARY] = df[Config.TICKET_SUMMARY].values.astype('U')
         df[Config.INTERACTION_CONTENT] = df[Config.INTERACTION_CONTENT].values.astype('U')
 
         # Optional: rename variable names for remembering easily
-        df["y1"] = df["Type 1"]
-        df["y2"] = df["Type 2"]
-        df["y3"] = df["Type 3"]
-        df["y4"] = df["Type 4"]
+        df["y1"] = df[Config.GROUPED]
+        df["y2"] = df[Config.CLASS_COL]
+        df["y3"] = df[Config.TYPE_COLS[0]]
+        df["y4"] = df[Config.TYPE_COLS[1]]
         df["x_ic"] = df[Config.INTERACTION_CONTENT]
         df["x_ts"] = df[Config.TICKET_SUMMARY]
 
-        print("Preprocessing Data:", df.shape)
         return df
 
 
@@ -74,11 +70,9 @@ class DataProcessor:
         # remove extrac white space
         # remove
         noise = "(sv\\s*:)|(wg\\s*:)|(ynt\\s*:)|(fw(d)?\\s*:)|(r\\s*:)|(re\\s*:)|(\\[|\\])|(aspiegel support issue submit)|(null)|(nan)|((bonus place my )?support.pt 自动回复:)"
-        data_frame["ts"] = data_frame["ts"].str.lower().replace(noise, " ", regex=True).replace(r'\\s+', ' ',
-                                                                                                regex=True).str.strip()
-        temp_debug = data_frame.loc[:, ["Ticket Summary", "ts", "y"]]
+        data_frame["x_ts"] = data_frame["x_ts"].str.lower().replace(noise, " ", regex=True).replace(r'\\s+', ' ', regex=True).str.strip()
 
-        data_frame["ic"] = data_frame["Interaction content"].str.lower()
+        data_frame["x_ic"] = data_frame["x_ic"].str.lower()
         noise_1 = [
             "(from :)|(subject :)|(sent :)|(r\\s*:)|(re\\s*:)",
             "(january|february|march|april|may|june|july|august|september|october|november|december)",
@@ -122,24 +116,26 @@ class DataProcessor:
             "(\\s|^).(\\s|$)"]
         for noise in noise_1:
             # print(noise)
-            data_frame["ic"] = data_frame["ic"].replace(noise, " ", regex=True)
-        data_frame["ic"] = data_frame["ic"].replace(r'\\s+', ' ', regex=True).str.strip()
-        temp_debug = data_frame.loc[:, ["Interaction content", "ic", "y"]]
+            data_frame["x_ic"] = data_frame["x_ic"].replace(noise, " ", regex=True)
+        data_frame["x_ic"] = data_frame["x_ic"].replace(r'\\s+', ' ', regex=True).str.strip()
 
-        # print(temp.y1.value_counts())
-        good_y1 = data_frame.y1.value_counts()[data_frame.y1.value_counts() > 10].index
-        data_frame = data_frame.loc[data_frame.y1.isin(good_y1)]
-        # print(temp.shape)
         return data_frame
 
-    def vectorize_data(self, temp):
+    @staticmethod
+    def vectorize_data(data_frame):
         ## Step 6: Textual data numerically:
         tfidfconverter = TfidfVectorizer(max_features=2000, min_df=4, max_df=0.90)
-        x1 = tfidfconverter.fit_transform(temp["Interaction content"]).toarray()
-        x2 = tfidfconverter.fit_transform(temp["ts"]).toarray()
-        X = np.concatenate((x1, x2), axis=1)
+        x_ic = tfidfconverter.fit_transform(data_frame["x_ic"]).toarray()
+        x_ts = tfidfconverter.fit_transform(data_frame["x_ts"]).toarray()
+        X = np.concatenate((x_ic, x_ts), axis=1)
         # remove bad test cases from test dataset
-        y = temp.y.to_numpy()
+        # convert the 4 labels in to an array of labels
+        y = list()
+        y.append(data_frame["y1"].to_numpy())
+        y.append(data_frame["y2"].to_numpy())
+        y.append(data_frame["y3"].to_numpy())
+        y.append(data_frame["y4"].to_numpy())
+
         return X, y
 
     def split_and_balance_data(X, y, test_size=0.2, min_class_samples=3):
