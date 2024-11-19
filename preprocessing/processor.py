@@ -11,10 +11,10 @@ from Config import Config
 
 
 class DataProcessor:
-    PATH_TO_APP = "../data/AppGallery.csv"
-    PATH_TO_PURCHASES = "../data/Purchasing.csv"
-    PATH_TO_APP_PREPROCESSED = "../data/AppGalleryPreprocessed.csv"
-    PATH_TO_PURCHASES_PREPROCESSED = "../data/PurchasingPreprocessed.csv"
+    PATH_TO_APP = "data/AppGallery.csv"
+    PATH_TO_PURCHASES = "data/Purchasing.csv"
+    PATH_TO_APP_PREPROCESSED = "data/AppGalleryPreprocessed.csv"
+    PATH_TO_PURCHASES_PREPROCESSED = "data/PurchasingPreprocessed.csv"
 
     def __init__(self):
         self.df = None
@@ -38,20 +38,17 @@ class DataProcessor:
     def pre_process(data_frame: pd.DataFrame):
         df = data_frame
         # convert the dtype object to unicode string
-        df['Interaction content'] = df['Interaction content'].values.astype('U')
-        df['Ticket Summary'] = df['Ticket Summary'].values.astype('U')
+        df[Config.TICKET_SUMMARY] = df[Config.TICKET_SUMMARY].values.astype('U')
+        df[Config.INTERACTION_CONTENT] = df[Config.INTERACTION_CONTENT].values.astype('U')
 
-        # Optional: rename variable names for remebering easily
+        # Optional: rename variable names for remembering easily
         df["y1"] = df["Type 1"]
         df["y2"] = df["Type 2"]
         df["y3"] = df["Type 3"]
         df["y4"] = df["Type 4"]
-        df["x"] = df['Interaction content']
+        df["x_ic"] = df[Config.INTERACTION_CONTENT]
+        df["x_ts"] = df[Config.TICKET_SUMMARY]
 
-        df["y"] = df["y2"]
-
-        # remove empty y
-        df = df.loc[(df["y"] != '') & (~df["y"].isna()),]
         print("Preprocessing Data:", df.shape)
         return df
 

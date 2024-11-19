@@ -50,24 +50,31 @@ def classification_context(classification_strategy: str):
     return classification_context
 
 # Code will start executing from following line
+def get_classifications(data_frame):
+
+
+
 if __name__ == '__main__':
     
     # pre-processing steps
     if exists_file(DataProcessor.PATH_TO_APP_PREPROCESSED):
-        load_data(DataProcessor.PATH_TO_APP_PREPROCESSED)
+        data_frame = load_data(DataProcessor.PATH_TO_APP_PREPROCESSED)
     else:
         data_frame = load_data(DataProcessor.PATH_TO_APP)
         data_frame = preprocess_data(data_frame)
         save_data(data_frame, DataProcessor.PATH_TO_APP_PREPROCESSED)
 
-    data_frame[Config.INTERACTION_CONTENT] = data_frame[Config.INTERACTION_CONTENT].values.astype('U')
-    data_frame[Config.TICKET_SUMMARY] = data_frame[Config.TICKET_SUMMARY].values.astype('U')
-
 
     # data transformation
-    X_IS, group_df = get_embeddings(data_frame, Config.INTERACTION_CONTENT)
+    data_frame = DataProcessor.pre_process(data_frame)
 
     logistic_model = classification_context('logistic_regression')
+    svm_model = classification_context('svm')
+    random_forest_model = classification_context('random_forest')
+    knn_model = classification_context('knn')
+    decision_tree_model = classification_context('decision_tree')
+
+    # Train mode
 
     # data modelling
     data = get_data_object(X_IS, data_frame)
