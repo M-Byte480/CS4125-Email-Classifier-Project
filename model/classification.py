@@ -43,6 +43,7 @@ class Classifier(IClassificationStrategy, ABC):
     def evaluate(self, X, y) -> float:
         y_pred = self.model.predict(X)
         accuracy = accuracy_score(y, y_pred)
+        print(f"Accuracy: {accuracy}")
         return accuracy
 
     @override
@@ -52,6 +53,9 @@ class Classifier(IClassificationStrategy, ABC):
     @override
     def load(self, file_path):
         self.model.load(file_path)
+
+    def __str__(self):
+        return str(self.model)
 
 # Strategy Pattern - Concrete Classification Classes
 class NaiveBayesClassifier(Classifier):
@@ -132,6 +136,9 @@ class ClassificationContext:
         """Notify observers of a classification."""
         for observer in self._observers:
             observer.update(classification)
+
+    def __str__(self):
+        return str(self._strategy)
 
 # Factory Pattern - Context Factory
 class ClassificationContextFactory:

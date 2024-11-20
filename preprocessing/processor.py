@@ -62,7 +62,7 @@ class DataProcessor:
     def replace_nan_data_in_column(data_frame, column_name):
         for idx, entry in enumerate(data_frame[column_name]):
             if entry == 'nan' or entry is None or entry != entry:
-                data_frame[column_name][idx] = ""
+                data_frame.loc[idx, column_name]= ""
         return data_frame
 
     @staticmethod
@@ -132,11 +132,16 @@ class DataProcessor:
         X = np.concatenate((x_ic, x_ts), axis=1)
         # remove bad test cases from test dataset
         # convert the 4 labels in to an array of labels
-        y = list()
-        y.append(data_frame["y1"].to_numpy())
-        y.append(data_frame["y2"].to_numpy())
-        y.append(data_frame["y3"].to_numpy())
-        y.append(data_frame["y4"].to_numpy())
+        y = {
+            "y1": data_frame["y1"].to_numpy(),
+            "y2": data_frame["y2"].to_numpy(),
+            "y3": data_frame["y3"].to_numpy(),
+            "y4": data_frame["y4"].to_numpy()
+        }
+        # y.append(data_frame["y1"].to_numpy())
+        # y.append(data_frame["y2"].to_numpy())
+        # y.append(data_frame["y3"].to_numpy())
+        # y.append(data_frame["y4"].to_numpy())
 
         return X, y
 

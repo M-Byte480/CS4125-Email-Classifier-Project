@@ -29,3 +29,6 @@ class BaseModel(ABC):
 
     def load(self, path) -> None:
         self.model = joblib.load(path)
+
+    def __str__(self):
+        return str(self.model)
