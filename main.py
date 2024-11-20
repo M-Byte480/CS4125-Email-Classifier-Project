@@ -7,8 +7,7 @@ import pandas as pd
 from Config import Config
 from preprocessing.processor import DataProcessor
 from embedding import get_tfidf_embd
-from modelling.modelling import *
-from modelling.data_model import *
+from model.classification import *
 
 seed = 0
 random.seed(seed)
@@ -29,12 +28,16 @@ def exists_file(file_path) -> bool:
 def preprocess_data(data_frame):
     # De-duplicate input data
     data_frame =  DataProcessor.de_duplication(data_frame)
-    data_frame = DataProcessor.replace_nan_interaction_summary(data_frame)
+    data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ts")
+    data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ic")
     # Translate
     data_frame = DataProcessor.translate_data_frame(data_frame)
     # remove noise in input data
     data_frame = DataProcessor.remove_noise(data_frame)
     return data_frame
+
+def extract_training_data(data_frame):
+    return DataProcessor.vectorize_data(data_frame)
 
 def get_embeddings(df:pd.DataFrame, text_column: str = Config.INTERACTION_CONTENT):
     X = get_tfidf_embd(df)  # get tf-idf embeddings
@@ -59,15 +62,22 @@ def extract_training_data(data_frame):
     return DataProcessor.vectorize_data(data_frame)
 
 if __name__ == '__main__':
-    
-    # pre-processing steps
+
+    # Loading data frame and preprocessing if needed
     if exists_file(DataProcessor.PATH_TO_APP_PREPROCESSED):
         data_frame = load_data(DataProcessor.PATH_TO_APP_PREPROCESSED)
+        data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ts")
+        data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ic")
         X, y = extract_training_data(data_frame)
     else:
         data_frame = load_data(DataProcessor.PATH_TO_APP)
         data_frame = DataProcessor.renaming_cols(data_frame)
         data_frame = preprocess_data(data_frame)
+        # Save preprocessed data frame for reuse
+        save_data(DataProcessor.PATH_TO_APP_PREPROCESSED, data_frame)
+
+        data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ts")
+        data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ic")
         X, y = extract_training_data(data_frame)
         save_data(data_frame, DataProcessor.PATH_TO_APP_PREPROCESSED)
 

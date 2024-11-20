@@ -39,16 +39,16 @@ class DataProcessor:
         df[Config.INTERACTION_CONTENT] = df[Config.INTERACTION_CONTENT].values.astype('U')
 
         # Optional: rename variable names for remembering easily
-        df["y1"] = df[Config.GROUPED]
-        df["y2"] = df[Config.CLASS_COL]
-        df["y3"] = df[Config.TYPE_COLS[0]]
-        df["y4"] = df[Config.TYPE_COLS[1]]
-        df["x_ic"] = df[Config.INTERACTION_CONTENT]
-        df["x_ts"] = df[Config.TICKET_SUMMARY]
+        df.rename(columns={
+            Config.INTERACTION_CONTENT: "x_ic",
+            Config.TICKET_SUMMARY: "x_ts",
+            Config.GROUPED: "y1",
+            Config.CLASS_COL: "y2",
+            Config.TYPE_COLS[0]: "y3",
+            Config.TYPE_COLS[1]: "y4",
+        }, inplace=True)
 
         return df
-
-
 
     @staticmethod
     def de_duplication(data_frame):
@@ -59,8 +59,10 @@ class DataProcessor:
         return df_no_duplicates
 
     @staticmethod
-    def replace_nan_interaction_summary(data_frame):
-        data_frame[Config.TICKET_SUMMARY].fillna("", inplace=True)
+    def replace_nan_data_in_column(data_frame, column_name):
+        for idx, entry in enumerate(data_frame[column_name]):
+            if entry == 'nan' or entry is None or entry != entry:
+                data_frame[column_name][idx] = ""
         return data_frame
 
     @staticmethod
@@ -172,8 +174,8 @@ class DataProcessor:
 
     @staticmethod
     def translate_data_frame(data_frame):
-        data_frame[Config.INTERACTION_CONTENT] = DataProcessor.trans_to_en(data_frame[Config.INTERACTION_CONTENT].to_list())
-        data_frame[Config.TICKET_SUMMARY] = DataProcessor.trans_to_en(data_frame[Config.TICKET_SUMMARY].to_list())
+        data_frame["x_ic"] = DataProcessor.trans_to_en(data_frame["x_ic"].to_list())
+        data_frame["x_ts"] = DataProcessor.trans_to_en(data_frame["x_ts"].to_list())
         return data_frame
 
     # Translation

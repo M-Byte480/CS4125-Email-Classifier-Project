@@ -1,5 +1,6 @@
-numpy==2.1.3
-pandas==2.2.3
-scikit-learn==1.5.2
-stanza==0.3
-transformers==4.46.3
+numpy>=1.26.4
+pandas>=2.2.2
+scikit-learn>=1.5.1
+stanza>=1.9.2
+transformers>=4.45.2
+sentencepiece>=0.2.0
