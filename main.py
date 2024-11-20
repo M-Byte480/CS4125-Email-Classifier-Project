@@ -1,12 +1,9 @@
-#This is a main file: The controller. All methods will directly on directly be called here
+# This is a main file: The controller. All methods will directly on directly be called here
 import numpy as np
 import random
 import os
-import pandas as pd
 
-from Config import Config
 from preprocessing.processor import DataProcessor
-from embedding import get_tfidf_embd
 from model.classification import *
 
 seed = 0
@@ -39,27 +36,33 @@ def preprocess_data(data_frame):
 def extract_training_data(data_frame):
     return DataProcessor.vectorize_data(data_frame)
 
-def get_embeddings(df:pd.DataFrame, text_column: str = Config.INTERACTION_CONTENT):
-    X = get_tfidf_embd(df)  # get tf-idf embeddings
-    return X, df
+def instantiate_all_models() -> [ClassificationContext]:
+    models = []
+    models.append(ClassificationContextFactory.create_context("naive_bayes"))
+    # models.append(ClassificationContextFactory.create_context("svm"))
+    # models.append(ClassificationContextFactory.create_context("decision_tree"))
+    # models.append(ClassificationContextFactory.create_context("random_forest"))
+    # models.append(ClassificationContextFactory.create_context("logistic_regression"))
+    return models
 
-def get_data_object(X: np.ndarray, df: pd.DataFrame):
-    return extract_classifications(X, df)
+def train_models(models: [ClassificationContext], X, y) -> None:
+    for model in models:
+        model.train_model(X, y)
 
-def perform_modelling(data, df: pd.DataFrame, name):
-    model_predict(data, df, name)
-
-def classification_context(classification_strategy: str):
-    classification_context = ClassificationContextFactory.create_context(classification_strategy)
-    return classification_context
+def get_best_model(models: [ClassificationContext], X, y) -> ClassificationContext:
+    best_model_score = 0
+    best_model = None
+    for model in models:
+        model_score = model.evaluate_model(X, y)
+        if (model_score > best_model_score):
+            best_model_score = model_score
+            best_model = model
+    return best_model
 
 # Code will start executing from following line
 # todo: for each label for each model train and store best for each label then add check if models already exist
 def get_classifications(data_frame):
     pass
-
-def extract_training_data(data_frame):
-    return DataProcessor.vectorize_data(data_frame)
 
 if __name__ == '__main__':
 
@@ -79,9 +82,20 @@ if __name__ == '__main__':
         data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ts")
         data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ic")
         X, y = extract_training_data(data_frame)
-        save_data(data_frame, DataProcessor.PATH_TO_APP_PREPROCESSED)
 
-    # data transformation
+    models = instantiate_all_models()
+
+    # todo: for type 3 and 4 we need to remove null labels as they can't be used in training
+    # Furthermore this should be done for every type in the case that a null label exists as we will never be able to train on unlabelled data with supervised learning
+    # Training models and evaluating the best model for each label
+    for idx, y_val in enumerate(y):
+        if (exists_file(f'trained_models/type_{idx+1}_model.h5')):
+            models[0].load_model(f'trained_models/type_{idx+1}_model.model')
+        else:
+            train_models(models, X, y_val)
+            best_model = get_best_model(models, X, y_val)
+            print(f'Saving model to trained_models/type_{idx+1}_model.model')
+            best_model.save_model(f'trained_models/type_{idx+1}_model.model')
 
     # logistic_model = classification_context('logistic_regression')
     # svm_model = classification_context('svm')

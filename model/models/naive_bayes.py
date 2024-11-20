@@ -15,23 +15,23 @@ class NaiveBayesModel(BaseModel):
         self.label_binarizer = LabelBinarizer()
 
     def train(self, X, y) -> None:
-        print("Transforming data...")
-        X_transformed = self.data_transform(X)
-        y_transformed = self.label_binarizer.fit_transform(y)
+        # self.fit_vectorizer(X)
 
-        print("Training Naive Bayes model...")
-        self.model.fit(X_transformed, y_transformed)
+        # print("Transforming data...")
+        # X_transformed = self.data_transform(X)
+        # y_transformed = self.label_binarizer.fit_transform(y)
 
-    def train(self, data) -> None:
-        self.train(data.X_train, data.y_train)
+        # print("Training Naive Bayes model...")
+        self.model.fit(X, y)
 
     def predict(self, X) -> list:
-        print("Transforming data for prediction...")
-        X_transformed = self.data_transform(X)
+        # print("Transforming data for prediction...")
+        # X_transformed = self.data_transform(X)
 
         print("Predicting...")
-        predictions = self.model.predict(X_transformed)
-        return self.label_binarizer.inverse_transform(predictions)
+        predictions = self.model.predict(X)
+        return predictions
+        # return self.label_binarizer.inverse_transform(predictions)
 
     def data_transform(self, X) -> any:
         return self.vectorizer.transform(X)

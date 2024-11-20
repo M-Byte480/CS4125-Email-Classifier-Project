@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import override
 
+from sklearn.metrics import accuracy_score
+
+from model.models.base import BaseModel
 from model.models.SVM import SVMModel
 from model.models.decisiontree import DecisionTreeModel
 from model.models.logistic_regression import LogisticRegressionModel
@@ -22,7 +25,7 @@ class Classifier(IClassificationStrategy, ABC):
     __slots__ = ('model',)
 
     def __init__(self):
-        self.model = None
+        self.model: BaseModel = None
 
     @override
     def train(self, X, y):
@@ -33,6 +36,20 @@ class Classifier(IClassificationStrategy, ABC):
         print(f"Classifying email: {email}")
         prediction = self.model.predict([email])
         return prediction
+
+    @override
+    def evaluate(self, X, y) -> float:
+        y_pred = self.model.predict(X)
+        accuracy = accuracy_score(y, y_pred)
+        return accuracy
+
+    @override
+    def save(self, file_path):
+        self.model.save(file_path)
+
+    @override
+    def load(self, file_path):
+        self.model.load(file_path)
 
 # Strategy Pattern - Concrete Classification Classes
 class NaiveBayesClassifier(Classifier):
@@ -75,9 +92,22 @@ class ClassificationContext:
         """Trains a model using the classification strategy"""
         self._strategy.train(X, y)
 
+    def evaluate_model(self, X, y) -> float:
+        """Evaluates a model using the classification strategy and returns its accuracy"""
+        return self._strategy.evaluate(X, y)
+
     def classify_email(self, email: Email) -> str:
         """Classifies an email using the current strategy."""
         return self._strategy.classify(email)
+
+    def save_model(self, file_path):
+        """Saves the model in the Classifier"""
+        self._strategy.save(file_path)
+
+    # todo: model that is loaded needs to be the same type of model as the strategy (Classifier)
+    def load_model(self, file_path):
+        """Loads a model into the Classifier"""
+        self._strategy.load(file_path)
 
 # Factory Pattern - Context Factory
 class ClassificationContextFactory:

@@ -1,13 +1,10 @@
 from abc import ABC, abstractmethod
-
-import pandas as pd
-import numpy as np
+import joblib
 
 
 class BaseModel(ABC):
     def __init__(self) -> None:
         ...
-
 
     @abstractmethod
     def train(self, X, y) -> None:
@@ -35,3 +32,9 @@ class BaseModel(ABC):
         self.__dict__.update(self.defaults)
         self.__dict__.update(values)
         return self
+
+    def save(self, path) -> None:
+        joblib.dump(self, path)
+
+    def load(self, path) -> None:
+        joblib.load(self, path)
