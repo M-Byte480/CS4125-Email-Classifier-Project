@@ -43,6 +43,7 @@ def instantiate_all_models() -> [ClassificationContext]:
     models.append(ClassificationContextFactory.create_context("decision_tree"))
     models.append(ClassificationContextFactory.create_context("random_forest"))
     models.append(ClassificationContextFactory.create_context("logistic_regression"))
+    models.append(ClassificationContextFactory.create_context("k_nearest_neighbors"))
     return models
 
 def train_models(models: [ClassificationContext], X, y) -> None:

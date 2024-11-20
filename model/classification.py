@@ -6,6 +6,7 @@ from sklearn.metrics import accuracy_score
 from model.models.base import BaseModel
 from model.models.SVM import SVMModel
 from model.models.decisiontree import DecisionTreeModel
+from model.models.k_nearest_neighbors import KNearestNeighborsModel
 from model.models.logistic_regression import LogisticRegressionModel
 from model.models.naive_bayes import NaiveBayesModel
 from model.models.randomforest import RandomForest
@@ -78,6 +79,11 @@ class LogisticRegressionClassifier(Classifier):
         super().__init__()
         self.model = LogisticRegressionModel()
 
+class KNearestNeighborsClassifier(Classifier):
+    def __init__(self):
+        super().__init__()
+        self.model = KNearestNeighborsModel()
+
 # Strategy Pattern - Context
 class ClassificationContext:
     strategy: Classifier
@@ -136,7 +142,8 @@ class ClassificationContextFactory:
             "svm": SVMClassifier,
             "decision_tree": DecisionTreeClassifier,
             "random_forest": RandomForestClassifier,
-            "logistic_regression": LogisticRegressionClassifier
+            "logistic_regression": LogisticRegressionClassifier,
+            "k_nearest_neighbors": KNearestNeighborsClassifier
         }
 
         constructor = constructor_selector.get(strategy)
