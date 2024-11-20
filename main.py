@@ -1,15 +1,16 @@
 #This is a main file: The controller. All methods will directly on directly be called here
 import numpy as np
+import random
+import os
+import pandas as pd
 
 from Config import Config
 from preprocessing.processor import DataProcessor
 from embedding import get_tfidf_embd
 from modelling.modelling import *
 from modelling.data_model import *
-import random
-import os
-import pandas as pd
-seed =0
+
+seed = 0
 random.seed(seed)
 np.random.seed(seed)
 
