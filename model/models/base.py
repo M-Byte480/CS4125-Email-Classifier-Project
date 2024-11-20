@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 import joblib
 
-
 class BaseModel(ABC):
     def __init__(self) -> None:
         self.model = None
@@ -17,7 +16,7 @@ class BaseModel(ABC):
         ...
 
     @abstractmethod
-    def predict(self, X) -> int:
+    def predict(self, X) -> list:
         """
         Make prediction using the trained ML Model for multi-class and multi-label classification.
         :params: X is essential, others are model specific

@@ -1,11 +1,8 @@
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.preprocessing import LabelBinarizer
 
 from model.models.base import BaseModel
 
 class NaiveBayesModel(BaseModel):
-
     def __init__(self) -> None:
         super().__init__()
         self.model = MultinomialNB()

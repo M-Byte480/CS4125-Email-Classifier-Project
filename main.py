@@ -39,10 +39,10 @@ def extract_training_data(data_frame):
 def instantiate_all_models() -> [ClassificationContext]:
     models = []
     models.append(ClassificationContextFactory.create_context("naive_bayes"))
-    # models.append(ClassificationContextFactory.create_context("svm"))
-    # models.append(ClassificationContextFactory.create_context("decision_tree"))
-    # models.append(ClassificationContextFactory.create_context("random_forest"))
-    # models.append(ClassificationContextFactory.create_context("logistic_regression"))
+    models.append(ClassificationContextFactory.create_context("svm"))
+    models.append(ClassificationContextFactory.create_context("decision_tree"))
+    models.append(ClassificationContextFactory.create_context("random_forest"))
+    models.append(ClassificationContextFactory.create_context("logistic_regression"))
     return models
 
 def train_models(models: [ClassificationContext], X, y) -> None:
@@ -60,7 +60,6 @@ def get_best_model(models: [ClassificationContext], X, y) -> ClassificationConte
     return best_model
 
 # Code will start executing from following line
-# todo: for each label for each model train and store best for each label then add check if models already exist
 def get_classifications(data_frame):
     pass
 
