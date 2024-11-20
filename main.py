@@ -89,7 +89,8 @@ if __name__ == '__main__':
     # Furthermore this should be done for every type in the case that a null label exists as we will never be able to train on unlabelled data with supervised learning
     # Training models and evaluating the best model for each label
     for idx, y_val in enumerate(y):
-        if (exists_file(f'trained_models/type_{idx+1}_model.h5')):
+        if (exists_file(f'trained_models/type_{idx+1}_model.model')):
+            print(f'Loading model from trained_models/type_{idx + 1}_model.model')
             models[0].load_model(f'trained_models/type_{idx+1}_model.model')
         else:
             train_models(models, X, y_val)
