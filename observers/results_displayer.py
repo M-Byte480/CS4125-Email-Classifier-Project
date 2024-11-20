@@ -1,8 +1,6 @@
 from typing import override
 
 from observers.email_classification_observer import EmailClassificationObserver
-from structs.objects import Email
-
 
 class ResultsDisplayer(EmailClassificationObserver):
     @override

@@ -9,6 +9,7 @@ from model.models.decisiontree import DecisionTreeModel
 from model.models.logistic_regression import LogisticRegressionModel
 from model.models.naive_bayes import NaiveBayesModel
 from model.models.randomforest import RandomForest
+from observers.email_classification_observer import EmailClassificationObserver
 from structs.objects import Email
 
 # Strategy Pattern - Interface
@@ -80,9 +81,11 @@ class LogisticRegressionClassifier(Classifier):
 # Strategy Pattern - Context
 class ClassificationContext:
     strategy: Classifier
+    _observers: [EmailClassificationObserver]  # Array of subscribed observers
 
     def __init__(self, strategy: Classifier) -> None:
         self._strategy = strategy
+        self._observers = []
 
     def set_strategy(self, strategy: Classifier) -> None:
         """Allows switching the strategy dynamically."""
@@ -108,6 +111,21 @@ class ClassificationContext:
     def load_model(self, file_path):
         """Loads a model into the Classifier"""
         self._strategy.load(file_path)
+
+    def add_observer(self, observer: EmailClassificationObserver) -> None:
+        """Subscribe an observer to this subject."""
+        if observer not in self._observers:
+            self._observers.append(observer)
+
+    def remove_observer(self, observer: EmailClassificationObserver) -> None:
+        """Unsubscribe an observer from this subject."""
+        if observer in self._observers:
+            self._observers.remove(observer)
+
+    def _notify_observers(self, classification: str) -> None:
+        """Notify observers of a classification."""
+        for observer in self._observers:
+            observer.update(classification)
 
 # Factory Pattern - Context Factory
 class ClassificationContextFactory:
