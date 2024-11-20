@@ -1,15 +1,16 @@
 #This is a main file: The controller. All methods will directly on directly be called here
 import numpy as np
+import random
+import os
+import pandas as pd
 
 from Config import Config
 from preprocessing.processor import DataProcessor
 from embedding import get_tfidf_embd
 from modelling.modelling import *
 from modelling.data_model import *
-import random
-import os
-import pandas as pd
-seed =0
+
+seed = 0
 random.seed(seed)
 np.random.seed(seed)
 
@@ -72,17 +73,17 @@ if __name__ == '__main__':
 
     # data transformation
 
-    logistic_model = classification_context('logistic_regression')
-    svm_model = classification_context('svm')
-    random_forest_model = classification_context('random_forest')
-    knn_model = classification_context('knn')
-    decision_tree_model = classification_context('decision_tree')
+    # logistic_model = classification_context('logistic_regression')
+    # svm_model = classification_context('svm')
+    # random_forest_model = classification_context('random_forest')
+    # knn_model = classification_context('knn')
+    # decision_tree_model = classification_context('decision_tree')
 
     # Train mode
 
     # data modelling
-    data = get_data_object(X_IS, data_frame)
+    # data = get_data_object(X_IS, data_frame)
     # modelling
-    perform_modelling(data, data_frame, 'name')
+    # perform_modelling(data, data_frame, 'name')
     # """
 
