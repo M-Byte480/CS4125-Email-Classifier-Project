@@ -73,17 +73,17 @@ if __name__ == '__main__':
 
     # data transformation
 
-    logistic_model = classification_context('logistic_regression')
-    svm_model = classification_context('svm')
-    random_forest_model = classification_context('random_forest')
-    knn_model = classification_context('knn')
-    decision_tree_model = classification_context('decision_tree')
+    # logistic_model = classification_context('logistic_regression')
+    # svm_model = classification_context('svm')
+    # random_forest_model = classification_context('random_forest')
+    # knn_model = classification_context('knn')
+    # decision_tree_model = classification_context('decision_tree')
 
     # Train mode
 
     # data modelling
-    data = get_data_object(X_IS, data_frame)
+    # data = get_data_object(X_IS, data_frame)
     # modelling
-    perform_modelling(data, data_frame, 'name')
+    # perform_modelling(data, data_frame, 'name')
     # """
 
