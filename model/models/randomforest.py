@@ -16,6 +16,9 @@ class RandomForest(BaseModel):
         self.model.fit(X, y)
 
     def predict(self, X) -> list:
-        print("Predicting...")
+        print("Predicting...", self.__class__.__name__)
         predictions = self.model.predict(X)
         return predictions
+
+    def __str__(self):
+        return "random_forest"
