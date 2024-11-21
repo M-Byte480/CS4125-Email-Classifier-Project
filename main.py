@@ -7,8 +7,8 @@ from observers.results_displayer import ResultsDisplayer
 from observers.statistics_collector import StatisticsCollector
 from preprocessing.processor import DataProcessor
 from model.classification import *
-from utilities.utility import load_values, instantiate_all_models, get_best_model, train_models, load_data
-from Config import Config
+from utilities.utility import load_values, instantiate_all_models, get_best_model, train_models
+from utilities.configuration.config import Config
 
 def print_usage() -> None:
     print("""
@@ -136,7 +136,7 @@ Trainable models:
         file_path = str(args[args.index("-c") + 1])
 
         try:
-            email_df = load_data(file_path)
+            email_df = DataProcessor.load_data(file_path)
             email_df = DataProcessor.renaming_cols(email_df)
             email_df = DataProcessor.translate_data_frame(email_df)
             X = processor.vectorize_unclassified_data(email_df)

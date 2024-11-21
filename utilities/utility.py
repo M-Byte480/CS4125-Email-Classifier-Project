@@ -1,54 +1,27 @@
 import os
 
 import numpy as np
-import pandas as pd
-from sklearn.preprocessing import OneHotEncoder
 
 from model.classification import ClassificationContext, ClassificationContextFactory
 from preprocessing.processor import DataProcessor
 
-
-def convert_y_values(X, y):
-    # Step 1: Convert to DataFrame for convenience
-    df = pd.DataFrame(y, columns=["y1", "y2", "y3", "y4"])
-
-    encoders = {}
-    encoded_columns = []
-
-    for col in df.columns:
-        encoder = OneHotEncoder(sparse=False)
-        one_hot = encoder.fit_transform(df[[col]])
-        encoded_columns.append(one_hot)
-        encoders[col] = encoder
-
-    y_encoded = np.hstack(encoded_columns)
-
-    print(f"One-hot encoded Y:\n{y_encoded}")
-
 def load_values(file_path):
     if exists_file(file_path):
-        data_frame = load_data(file_path)
+        data_frame = DataProcessor.load_data(file_path)
         data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ts")
         data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ic")
     else:
         file_path = DataProcessor.PATH_TO_APP if "App" in file_path else DataProcessor.PATH_TO_PURCHASES
-        data_frame = load_data(file_path)
+        data_frame = DataProcessor.load_data(file_path)
         data_frame = DataProcessor.renaming_cols(data_frame)
         data_frame = preprocess_data(data_frame)
         # Save preprocessed data frame for reuse
-        save_data(file_path, data_frame)
+        DataProcessor.save_data(file_path, data_frame)
 
         data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ts")
         data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ic")
 
     return data_frame
-
-def load_data(file_path):
-    #load the input data
-    return DataProcessor.load_data(file_path)
-
-def save_data(file_path, data):
-    return DataProcessor.save_data(file_path, data)
 
 def exists_file(file_path) -> bool:
     """Checks if the specified file exists"""
@@ -99,7 +72,3 @@ def get_best_model(models: [ClassificationContext], X, y) -> ClassificationConte
             best_model = model
 
     return best_model
-
-# Code will start executing from following line
-def get_classifications(data_frame):
-    pass

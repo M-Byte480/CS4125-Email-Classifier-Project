@@ -1,14 +1,13 @@
+# todo: review unused file
+
 from abc import ABC, abstractmethod
 
 from structs.objects import Email
-
 
 class Observer(ABC):
     @abstractmethod
     def update(self, email: Email, classification):
         pass
-
-
 
 class EmailClassifier:
     def __init__(self):

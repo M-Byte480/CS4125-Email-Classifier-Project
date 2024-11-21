@@ -1,7 +1,9 @@
+# todo: review unused file
+
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from Config import Config
+from utilities.configuration.config import Config
 
 
 def get_tfidf_embd(df: pd.DataFrame, text_column: str = Config.INTERACTION_CONTENT):

@@ -1,14 +1,11 @@
 import numpy as np
 import pandas as pd
 import stanza
+
 from stanza.pipeline.core import DownloadMethod
-from transformers import pipeline
 from transformers import M2M100ForConditionalGeneration, M2M100Tokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from Config import Config
-
+from utilities.configuration.config import Config
 
 class DataProcessor:
     PATH_TO_APP = "data/AppGallery.csv"
@@ -16,6 +13,27 @@ class DataProcessor:
     PATH_TO_APP_PREPROCESSED = "data/AppGalleryPreprocessed.csv"
     PATH_TO_PURCHASES_PREPROCESSED = "data/PurchasingPreprocessed.csv"
     tfidfconverter = TfidfVectorizer(max_features=2000, min_df=4, max_df=0.90)
+
+    def vectorize_data(self, data_frame):
+        ## Step 6: Textual data numerically:
+        x_ic = self.tfidfconverter.fit_transform(data_frame["x_ic"]).toarray()
+        x_ts = self.tfidfconverter.transform(data_frame["x_ts"]).toarray()
+        X = np.concatenate((x_ic, x_ts), axis=1)
+        # remove bad test cases from test dataset
+        # convert the 4 labels in to an array of labels
+        y = {
+            "y1": data_frame["y1"].to_numpy(),
+            "y2": data_frame["y2"].to_numpy(),
+            "y3": data_frame["y3"].to_numpy(),
+            "y4": data_frame["y4"].to_numpy()
+        }
+        return X, y
+
+    def vectorize_unclassified_data(self, data_frame):
+        x_ic = self.tfidfconverter.transform(data_frame["x_ic"]).toarray()
+        x_ts = self.tfidfconverter.transform(data_frame["x_ts"]).toarray()
+        X = np.concatenate((x_ic, x_ts), axis=1)
+        return X
 
     @staticmethod
     def load_data(file_path):
@@ -120,27 +138,6 @@ class DataProcessor:
 
         return data_frame
 
-    def vectorize_data(self, data_frame):
-        ## Step 6: Textual data numerically:
-        x_ic = self.tfidfconverter.fit_transform(data_frame["x_ic"]).toarray()
-        x_ts = self.tfidfconverter.transform(data_frame["x_ts"]).toarray()
-        X = np.concatenate((x_ic, x_ts), axis=1)
-        # remove bad test cases from test dataset
-        # convert the 4 labels in to an array of labels
-        y = {
-            "y1": data_frame["y1"].to_numpy(),
-            "y2": data_frame["y2"].to_numpy(),
-            "y3": data_frame["y3"].to_numpy(),
-            "y4": data_frame["y4"].to_numpy()
-        }
-        return X, y
-
-    def vectorize_unclassified_data(self, data_frame):
-        x_ic = self.tfidfconverter.transform(data_frame["x_ic"]).toarray()
-        x_ts = self.tfidfconverter.transform(data_frame["x_ts"]).toarray()
-        X = np.concatenate((x_ic, x_ts), axis=1)
-        return X
-
     @staticmethod
     def remove_nan_rows(X, y):
         indices_of_nans = []
@@ -152,38 +149,6 @@ class DataProcessor:
         y = np.delete(y, indices_of_nans)
         return X, y
 
-    def split_and_balance_data(X, y, test_size=0.2, min_class_samples=3):
-        y_series = pd.Series(y)
-        good_y_value = y_series.value_counts()[y_series.value_counts() >= min_class_samples].index
-        X_good, y_good = X[y_series.isin(good_y_value)], y[y_series.isin(good_y_value)]
-        X_bad, y_bad = X[~y_series.isin(good_y_value)], y[~y_series.isin(good_y_value)]
-
-        adjusted_test_size = test_size * len(X) / len(X_good)
-        X_train, X_test, y_train, y_test = train_test_split(X_good, y_good, test_size=adjusted_test_size,
-                                                            random_state=0)
-        X_train = np.concatenate((X_train, X_bad), axis=0)
-        y_train = np.concatenate((y_train, y_bad), axis=0)
-
-        return X_train, X_test, y_train, y_test
-
-    def train(self, classifier_model, data):
-        X_train, y_train, X_test, y_test = data
-        ### Step 10: Model selection for classification
-        classifier_model = RandomForestClassifier(n_estimators=1000, random_state=0)
-
-        ### Step 11: Model Training
-        classifier_model.fit(X_train, y_train)
-
-        from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
-
-        y_pred = classifier_model.predict(X_test)
-
-        p_result = pd.DataFrame(classifier_model.predict_proba(X_test))
-        p_result.columns = classifier_model.classes_
-        print(p_result)
-        print(confusion_matrix(y_test, y_pred))
-        print(classification_report(y_test, y_pred))
-
     @staticmethod
     def translate_data_frame(data_frame):
         data_frame["x_ic"] = DataProcessor.trans_to_en(data_frame["x_ic"].to_list())
@@ -194,7 +159,6 @@ class DataProcessor:
     @staticmethod
     def trans_to_en(texts):
         t2t_m = "facebook/m2m100_418M"
-        t2t_pipe = pipeline(task='text2text-generation', model=t2t_m)
 
         model = M2M100ForConditionalGeneration.from_pretrained(t2t_m)
         tokenizer = M2M100Tokenizer.from_pretrained(t2t_m)
@@ -226,7 +190,6 @@ class DataProcessor:
             # Detected lang
             detected_lang = language_map.get(detected_lang, detected_lang)
 
-
             tokenizer.src_lang = detected_lang
             encoded_hi = tokenizer(text, return_tensors="pt")
             generated_tokens = model.generate(
@@ -236,6 +199,5 @@ class DataProcessor:
             text_en = tokenizer.decode(generated_tokens[0], skip_special_tokens=True)
 
             text_en_l.append(text_en)
-
 
         return text_en_l

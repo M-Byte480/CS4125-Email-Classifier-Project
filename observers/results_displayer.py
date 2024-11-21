@@ -15,6 +15,7 @@ class ResultsDisplayer(EmailClassificationObserver):
     Classification: {classification}
 """)
 
+# todo: review unused class
 class DisplayResultsCommand:
     disp : ResultsDisplayer
     classy : EmailClassificationObserver
