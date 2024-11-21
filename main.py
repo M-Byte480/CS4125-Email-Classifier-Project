@@ -2,113 +2,145 @@
 import numpy as np
 import random
 import os
+import sys
+import pandas as pd
 
+from observers.results_displayer import ResultsDisplayer
+from observers.statistics_collector import StatisticsCollector
 from preprocessing.processor import DataProcessor
 from model.classification import *
+from utilities.utility import load_values, instantiate_all_models, get_best_model, train_models, load_data
 
 seed = 0
 random.seed(seed)
 np.random.seed(seed)
 
-
-def load_data(file_path):
-    #load the input data
-    return DataProcessor.load_data(file_path)
-
-def save_data(file_path, data):
-    return DataProcessor.save_data(file_path, data)
-
-def exists_file(file_path) -> bool:
-    """Checks if the specified file exists"""
-    return os.path.isfile(file_path)
-
-def preprocess_data(data_frame):
-    # De-duplicate input data
-    data_frame =  DataProcessor.de_duplication(data_frame)
-    data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ts")
-    data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ic")
-    # Translate
-    data_frame = DataProcessor.translate_data_frame(data_frame)
-    # remove noise in input data
-    data_frame = DataProcessor.remove_noise(data_frame)
-    return data_frame
-
-def extract_training_data(data_frame):
-    return DataProcessor.vectorize_data(data_frame)
-
-def instantiate_all_models() -> [ClassificationContext]:
-    models = []
-    models.append(ClassificationContextFactory.create_context("naive_bayes"))
-    models.append(ClassificationContextFactory.create_context("svm"))
-    models.append(ClassificationContextFactory.create_context("decision_tree"))
-    models.append(ClassificationContextFactory.create_context("random_forest"))
-    models.append(ClassificationContextFactory.create_context("logistic_regression"))
-    models.append(ClassificationContextFactory.create_context("k_nearest_neighbors"))
-    return models
-
-def train_models(models: [ClassificationContext], X, y) -> None:
-    for model in models:
-        model.train_model(X, y)
-
-def get_best_model(models: [ClassificationContext], X, y) -> ClassificationContext:
-    best_model_score = 0
-    best_model = None
-    for model in models:
-        model_score = model.evaluate_model(X, y)
-        if (model_score > best_model_score):
-            best_model_score = model_score
-            best_model = model
-    return best_model
-
-# Code will start executing from following line
-def get_classifications(data_frame):
-    pass
+def print_usage() -> None:
+    print("""
+Usage: python main.py
+        -t <model-name>       : Trains the specified model for all labels. These models are not saved and are for one time use.
+        -l                    : Lists all trainable models.
+        -r                    : Trains the best model for each label and saves the models for future use unless another model is specified. This will overwrite any previously saved models.
+        -c <path/to/file.csv> : Classifies emails in the file at the specified location (trained models are required for this to work).""")
 
 if __name__ == '__main__':
 
-    # Loading data frame and preprocessing if needed
-    if exists_file(DataProcessor.PATH_TO_APP_PREPROCESSED):
-        data_frame = load_data(DataProcessor.PATH_TO_APP_PREPROCESSED)
-        data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ts")
-        data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ic")
-        X, y = extract_training_data(data_frame)
-    else:
-        data_frame = load_data(DataProcessor.PATH_TO_APP)
-        data_frame = DataProcessor.renaming_cols(data_frame)
-        data_frame = preprocess_data(data_frame)
-        # Save preprocessed data frame for reuse
-        save_data(DataProcessor.PATH_TO_APP_PREPROCESSED, data_frame)
+    args = sys.argv
 
-        data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ts")
-        data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ic")
-        X, y = extract_training_data(data_frame)
+    # Args are necessary
+    if len(args) <= 1:
+        print_usage()
+        exit(0)
 
-    models = instantiate_all_models()
+    # List all trainable models
+    if '-l' in args:
+        print("""
+Trainable models:
+    - naive_bayes
+    - svm
+    - decision_tree
+    - random_forest
+    - logistic_regression
+    - k_nearest_neighbors
+""")
 
-    # todo: for type 3 and 4 we need to remove null labels as they can't be used in training
-    # Furthermore this should be done for every type in the case that a null label exists as we will never be able to train on unlabelled data with supervised learning
-    # Training models and evaluating the best model for each label
-    for idx, y_val in enumerate(y):
-        if (exists_file(f'trained_models/type_{idx+1}_model.model')):
-            print(f'Loading model from trained_models/type_{idx + 1}_model.model')
-            models[0].load_model(f'trained_models/type_{idx+1}_model.model')
-        else:
+    # This array is used to store trained models for classification
+    models = []
+    processor = DataProcessor()
+
+    # Train a specific model
+    if '-t' in args:
+        # If model not specified exit
+        if args[args.index('-t') + 1] is None:
+            print_usage()
+            exit(1)
+        model_name = str(args[args.index('-t') + 1])
+
+        try:
+            model_context = ClassificationContextFactory.create_context(model_name)
+        except ValueError as e:
+            print_usage()
+            print(e)
+            exit(1)
+
+        # Loading data frame and preprocessing if needed
+        app_data_frame = load_values(DataProcessor.PATH_TO_APP_PREPROCESSED)
+        pur_data_frame_ = load_values(DataProcessor.PATH_TO_PURCHASES_PREPROCESSED)
+
+        combined_data_frame = pd.concat([app_data_frame, pur_data_frame_], axis=0, ignore_index=True)
+        X, y = processor.vectorize_data(combined_data_frame)
+
+        for idx, (label_name, y_val) in enumerate(y.items()):
+            print(f"Training model for {label_name}...")
+            # Add model
+            models.append(model_context)
+
+            y_val = y_val.astype(str)
+
+            # Train models on the current task
+            train_models([model_context], X, y_val)
+
+    # Train best performing models for each label and save them
+    if '-r' in args:
+        app_data_frame = load_values(DataProcessor.PATH_TO_APP_PREPROCESSED)
+        pur_data_frame_ = load_values(DataProcessor.PATH_TO_PURCHASES_PREPROCESSED)
+
+        combined_data_frame = pd.concat([app_data_frame, pur_data_frame_], axis=0, ignore_index=True)
+        X, y = processor.vectorize_data(combined_data_frame)
+
+        for idx, (label_name, y_val) in enumerate(y.items()):
+            print(f"Training models for {label_name}...")
+            # Instantiate fresh models for this task
+            models = instantiate_all_models()
+            y_val = y_val.astype(str)
+
+            # Train models on the current task
             train_models(models, X, y_val)
+
+            # Get the best-performing model for this task
             best_model = get_best_model(models, X, y_val)
-            print(f'Saving model to trained_models/type_{idx+1}_model.model')
-            best_model.save_model(f'trained_models/type_{idx+1}_model.model')
 
-    # logistic_model = classification_context('logistic_regression')
-    # svm_model = classification_context('svm')
-    # random_forest_model = classification_context('random_forest')
-    # knn_model = classification_context('knn')
-    # decision_tree_model = classification_context('decision_tree')
+            os.makedirs("trained_models", exist_ok=True)
 
-    # Train mode
+            # Save the trained model
+            model_path = f"trained_models/{label_name}_model.{str(best_model)}"
 
-    # data modelling
-    # data = get_data_object(X_IS, data_frame)
-    # modelling
-    # perform_modelling(data, data_frame, 'name')
-    # """
+            print(f"Saving model to {model_path}")
+            best_model.save_model(model_path)
 
+    # Classify emails in the specified CSV
+    if "-c" in args:
+        # If file path not specified exit
+        if args[args.index('-c') + 1] is None:
+            print_usage()
+            exit(1)
+
+        file_path = str(args[args.index("-c") + 1])
+
+        try:
+            email_df = load_data(file_path)
+            email_df = DataProcessor.renaming_cols(email_df)
+            email_df = DataProcessor.translate_data_frame(email_df)
+            X = processor.vectorize_unclassified_data(email_df)
+        except Exception as e:
+            print(e)
+            print("""
+Error in processing of data
+Make sure in your CSV you have the at least the following columns:
+    - Ticket Summary
+    - Interaction Content""")
+            exit(1)
+
+        print(f"Classifying emails in {file_path}")
+        # Subscribe observers for tracking classification information
+        rd = ResultsDisplayer()
+        sc = StatisticsCollector()
+        for model in models:
+            model.add_observer(rd)
+            model.add_observer(sc)
+
+        for idx, email in enumerate(X):
+            for model in models:
+                model.classify_email(email, email_df["x_ts"][idx], email_df["x_ic"][idx])
+
+        sc.display_stats()

@@ -15,10 +15,7 @@ class DataProcessor:
     PATH_TO_PURCHASES = "data/Purchasing.csv"
     PATH_TO_APP_PREPROCESSED = "data/AppGalleryPreprocessed.csv"
     PATH_TO_PURCHASES_PREPROCESSED = "data/PurchasingPreprocessed.csv"
-
-    def __init__(self):
-        data = self.split_and_balance_data(X, y)
-        self.train(RandomForestClassifier(n_estimators=1000, random_state=0), data)
+    tfidfconverter = TfidfVectorizer(max_features=2000, min_df=4, max_df=0.90)
 
     @staticmethod
     def load_data(file_path):
@@ -123,12 +120,10 @@ class DataProcessor:
 
         return data_frame
 
-    @staticmethod
-    def vectorize_data(data_frame):
+    def vectorize_data(self, data_frame):
         ## Step 6: Textual data numerically:
-        tfidfconverter = TfidfVectorizer(max_features=2000, min_df=4, max_df=0.90)
-        x_ic = tfidfconverter.fit_transform(data_frame["x_ic"]).toarray()
-        x_ts = tfidfconverter.fit_transform(data_frame["x_ts"]).toarray()
+        x_ic = self.tfidfconverter.fit_transform(data_frame["x_ic"]).toarray()
+        x_ts = self.tfidfconverter.transform(data_frame["x_ts"]).toarray()
         X = np.concatenate((x_ic, x_ts), axis=1)
         # remove bad test cases from test dataset
         # convert the 4 labels in to an array of labels
@@ -138,12 +133,13 @@ class DataProcessor:
             "y3": data_frame["y3"].to_numpy(),
             "y4": data_frame["y4"].to_numpy()
         }
-        # y.append(data_frame["y1"].to_numpy())
-        # y.append(data_frame["y2"].to_numpy())
-        # y.append(data_frame["y3"].to_numpy())
-        # y.append(data_frame["y4"].to_numpy())
-
         return X, y
+
+    def vectorize_unclassified_data(self, data_frame):
+        x_ic = self.tfidfconverter.transform(data_frame["x_ic"]).toarray()
+        x_ts = self.tfidfconverter.transform(data_frame["x_ts"]).toarray()
+        X = np.concatenate((x_ic, x_ts), axis=1)
+        return X
 
     def split_and_balance_data(X, y, test_size=0.2, min_class_samples=3):
         y_series = pd.Series(y)

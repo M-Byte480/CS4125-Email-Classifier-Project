@@ -65,9 +65,6 @@ def preprocess_data(data_frame):
     data_frame = DataProcessor.remove_noise(data_frame)
     return data_frame
 
-def extract_training_data(data_frame):
-    return DataProcessor.vectorize_data(data_frame)
-
 def instantiate_all_models() -> [ClassificationContext]:
     models = []
     models.append(ClassificationContextFactory.create_context("naive_bayes"))

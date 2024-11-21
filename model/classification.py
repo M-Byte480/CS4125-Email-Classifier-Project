@@ -44,7 +44,6 @@ class Classifier(IClassificationStrategy, ABC):
 
     @override
     def classify(self, email) -> str:
-        print(f"Classifying email: {email}")
         prediction = self.model.predict([email])
         return prediction[0]
 
@@ -118,9 +117,11 @@ class ClassificationContext:
         """Evaluates a model using the classification strategy and returns its accuracy"""
         return self._strategy.evaluate(X, y)
 
-    def classify_email(self, email: Email) -> str:
+    def classify_email(self, email, ts, ic) -> str:
         """Classifies an email using the current strategy."""
-        return self._strategy.classify(email)
+        classification = self._strategy.classify(email)
+        self._notify_observers(ts, ic, classification)
+        return classification
 
     def save_model(self, file_path):
         """Saves the model in the Classifier"""
@@ -141,10 +142,10 @@ class ClassificationContext:
         if observer in self._observers:
             self._observers.remove(observer)
 
-    def _notify_observers(self, classification: str) -> None:
+    def _notify_observers(self, ts, ic, classification: str) -> None:
         """Notify observers of a classification."""
         for observer in self._observers:
-            observer.update(classification)
+            observer.update(ts, ic, classification)
 
     def __str__(self):
         return str(self._strategy)
