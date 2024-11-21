@@ -20,7 +20,7 @@ class BaseModel(ABC):
         """
         Make prediction using the trained ML Model for multi-class and multi-label classification.
         :params: X is essential, others are model specific
-        :return: prediction score
+        :return: prediction
         """
         ...
 

@@ -21,6 +21,15 @@ class IClassificationStrategy(ABC):
     @abstractmethod
     def classify(self, email: Email):
         pass
+    @abstractmethod
+    def evaluate(self, X, y):
+        pass
+    @abstractmethod
+    def save(self, file_path):
+        pass
+    @abstractmethod
+    def load(self, file_path):
+        pass
 
 # Parent Classification Classes
 class Classifier(IClassificationStrategy, ABC):
@@ -37,7 +46,7 @@ class Classifier(IClassificationStrategy, ABC):
     def classify(self, email) -> str:
         print(f"Classifying email: {email}")
         prediction = self.model.predict([email])
-        return prediction
+        return prediction[0]
 
     @override
     def evaluate(self, X, y) -> float:
