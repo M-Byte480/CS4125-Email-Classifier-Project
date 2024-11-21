@@ -39,22 +39,25 @@ class StatisticsCollector(EmailClassificationObserver):
         total_emails_classified = self._total_classifications // 4
 
         print(f"Statistics report:")
-        if total_emails_classified > 0:
+        if sum(self._label_1_stats.values()) > 0:
             print("\n   Type 1:")
             for key, value in self._label_1_stats.items():
                 percentage = np.round(value / sum(self._label_1_stats.values()) * 100, 2)
                 print(f"    - {key.ljust(47)}: {value} | {percentage}%")
 
+        if sum(self._label_2_stats.values()) > 0:
             print("\n   Type 2:")
             for key, value in self._label_2_stats.items():
                 percentage = np.round(value / sum(self._label_2_stats.values()) * 100, 2)
                 print(f"    - {key.ljust(47)}: {value} | {percentage}%")
 
+        if sum(self._label_3_stats.values()) > 0:
             print("\n   Type 3:")
             for key, value in self._label_3_stats.items():
                 percentage = np.round(value / sum(self._label_3_stats.values()) * 100, 2)
                 print(f"    - {key.ljust(47)}: {value} | {percentage}%")
 
+        if sum(self._label_4_stats.values()) > 0:
             print("\n   Type 4:")
             for key, value in self._label_4_stats.items():
                 percentage = np.round(value / sum(self._label_4_stats.values()) * 100, 2)
