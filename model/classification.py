@@ -127,7 +127,6 @@ class ClassificationContext:
         """Saves the model in the Classifier"""
         self._strategy.save(file_path)
 
-    # todo: model that is loaded needs to be the same type of model as the strategy (Classifier)
     def load_model(self, file_path):
         """Loads a model into the Classifier"""
         self._strategy.load(file_path)

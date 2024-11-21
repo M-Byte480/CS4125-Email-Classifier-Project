@@ -64,17 +64,19 @@ Trainable models:
         X, y = load_training_data()
 
         for label_name, y_val in y.items():
+            print(f"Training model for {label_name}...")
             try:
                 model_context = ClassificationContextFactory.create_context(model_name)
             except ValueError as e:
                 print("Model name invalid!")
                 exit(1)
 
-            print(f"Training model for {label_name}...")
+            # Remove unlabelled rows
+            X_trimmed, y_val = DataProcessor.remove_nan_rows(X, y_val)
             y_val = y_val.astype(str)
 
             # Train models on the current task
-            model_context.train_model(X, y_val)
+            model_context.train_model(X_trimmed, y_val)
 
             # Add model
             models.append(model_context)
@@ -88,13 +90,16 @@ Trainable models:
             print(f"Training models for {label_name}...")
             # Instantiate fresh models for this task
             candidates = instantiate_all_models()
+
+            # Remove unlabelled rows
+            X_trimmed, y_val = DataProcessor.remove_nan_rows(X, y_val)
             y_val = y_val.astype(str)
 
             # Train models on the current task
-            train_models(candidates, X, y_val)
+            train_models(candidates, X_trimmed, y_val)
 
             # Get the best-performing model for this task
-            best_model = get_best_model(candidates, X, y_val)
+            best_model = get_best_model(candidates, X_trimmed, y_val)
             models.append(best_model)
 
             os.makedirs(Config.TRAINED_MODELS_DIR, exist_ok=True)

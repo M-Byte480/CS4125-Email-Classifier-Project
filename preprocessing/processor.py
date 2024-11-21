@@ -141,6 +141,17 @@ class DataProcessor:
         X = np.concatenate((x_ic, x_ts), axis=1)
         return X
 
+    @staticmethod
+    def remove_nan_rows(X, y):
+        indices_of_nans = []
+        for idx, y_val in enumerate(y):
+            if y_val == 'nan' or y_val != y_val:
+                indices_of_nans.append(idx)
+
+        X = np.delete(X, indices_of_nans, axis=0)
+        y = np.delete(y, indices_of_nans)
+        return X, y
+
     def split_and_balance_data(X, y, test_size=0.2, min_class_samples=3):
         y_series = pd.Series(y)
         good_y_value = y_series.value_counts()[y_series.value_counts() >= min_class_samples].index
