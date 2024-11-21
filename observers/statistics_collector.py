@@ -19,7 +19,7 @@ class StatisticsCollector(EmailClassificationObserver):
         self._label_3_stats = {"AppGallery-Install/Upgrade": 0, "AppGallery-Use": 0, "Third Party APPs": 0,
                                "VIP / Offers / Promotions": 0, "General": 0, "Coupon/Gifts/Points Issues": 0,
                                "Other": 0, "Payment": 0, "Payment issue": 0, "Invoice": 0}
-        self._label_4_stats = {"Can't update Apps": 0, "Others": 0, "Refund": 0, "Offers / Vouchers / Promotions": 0,
+        self._label_4_stats = {"Can't update Apps": 0, "Others ": 0, "Refund": 0, "Offers / Vouchers / Promotions": 0,
                                "Can't download Apps": 0, "Cannot connect - Server": 0, "Can't install Apps": 0,
                                "Other download/install/update issue": 0, "Personal data": 0,
                                "AppGallery not loading": 0, "Can't use or acquire": 0,
