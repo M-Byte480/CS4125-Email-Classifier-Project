@@ -7,10 +7,10 @@ class KNearestNeighborsModel(BaseModel):
         self.model = KNeighborsClassifier()
 
     def train(self, X, y) -> None:
-        print("Training K Nearest Neighbors model...")
+        print(f"Training {self.__class__.__name__} model...")
         self.model.fit(X, y)
 
     def predict(self, X) -> list:
-        print("Predicting...")
+        print(f"Predicting using {self.__class__.__name__}...")
         predictions = self.model.predict(X)
         return predictions

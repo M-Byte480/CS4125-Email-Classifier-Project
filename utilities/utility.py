@@ -94,7 +94,7 @@ def get_best_model(models: [ClassificationContext], X, y) -> ClassificationConte
             print(f"Skipping Validation for {model}: only one class present ({unique_classes[0]})")
             continue
         model_score = model.evaluate_model(X, y)
-        if (model_score > best_model_score):
+        if model_score > best_model_score:
             best_model_score = model_score
             best_model = model
 

@@ -12,11 +12,11 @@ class RandomForest(BaseModel):
         self.model = RandomForestClassifier(n_estimators=1000, random_state=seed, class_weight='balanced_subsample')
 
     def train(self, X, y) -> None:
-        print("Training Random Forest model...")
+        print(f"Training {self.__class__.__name__} model...")
         self.model.fit(X, y)
 
     def predict(self, X) -> list:
-        print("Predicting...", self.__class__.__name__)
+        print(f"Predicting using {self.__class__.__name__}...")
         predictions = self.model.predict(X)
         return predictions
 

@@ -8,11 +8,11 @@ class NaiveBayesModel(BaseModel):
         self.model = MultinomialNB()
 
     def train(self, X, y) -> None:
-        print("Training Naive Bayes model...")
+        print(f"Training {self.__class__.__name__} model...")
         self.model.fit(X, y)
 
     def predict(self, X) -> list:
-        print("Predicting...", self.__class__.__name__)
+        print(f"Predicting using {self.__class__.__name__}...")
         predictions = self.model.predict(X)
         return predictions
 

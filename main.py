@@ -91,14 +91,15 @@ Trainable models:
         for idx, (label_name, y_val) in enumerate(y.items()):
             print(f"Training models for {label_name}...")
             # Instantiate fresh models for this task
-            models = instantiate_all_models()
+            candidates = instantiate_all_models()
             y_val = y_val.astype(str)
 
             # Train models on the current task
-            train_models(models, X, y_val)
+            train_models(candidates, X, y_val)
 
             # Get the best-performing model for this task
-            best_model = get_best_model(models, X, y_val)
+            best_model = get_best_model(candidates, X, y_val)
+            models.append(best_model)
 
             os.makedirs("trained_models", exist_ok=True)
 
@@ -144,3 +145,5 @@ Make sure in your CSV you have the at least the following columns:
                 model.classify_email(email, email_df["x_ts"][idx], email_df["x_ic"][idx])
 
         sc.display_stats()
+
+    exit(0)

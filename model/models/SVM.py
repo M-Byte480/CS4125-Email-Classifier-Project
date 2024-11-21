@@ -8,11 +8,11 @@ class SVMModel(BaseModel):
         self.model = SVC(probability=True) # SVM with probability support
 
     def train(self, X, y) -> None:
-        print("Training SVM model...")
+        print(f"Training {self.__class__.__name__} model...")
         self.model = self.model.fit(X, y)
 
     def predict(self, X) -> list:
-        print("Predicting...", self.__class__.__name__)
+        print(f"Predicting using {self.__class__.__name__}...")
         predictions = self.model.predict(X)
         return predictions
 
