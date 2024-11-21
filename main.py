@@ -116,6 +116,7 @@ Trainable models:
 
         if len(model_paths) < 4:
             print(f"Not enough saved models, expected {4}, found {len(model_paths)}")
+            exit(1)
 
         for model_path in model_paths:
             model_type = model_path.split('.')[1]
