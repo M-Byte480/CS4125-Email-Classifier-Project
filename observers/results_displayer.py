@@ -4,12 +4,16 @@ from observers.email_classification_observer import EmailClassificationObserver
 
 class ResultsDisplayer(EmailClassificationObserver):
     @override
-    def update(self, classification: str) -> None:
-        self._display(classification)
+    def update(self, ts, ic, classification: str) -> None:
+        self._display(ts, ic, classification)
 
-    def _display(self, classification: str) -> None:
+    def _display(self, ts, ic, classification: str) -> None:
         """Print classification result."""
-        print(f"\nEmail classification result: {classification}")
+        print(f"""Email classification result:
+    Ticket summary: {ts}
+    Interaction content: {ic}
+    Classification: {classification}
+""")
 
 class DisplayResultsCommand:
     disp : ResultsDisplayer
