@@ -68,7 +68,7 @@ class Utils:
             model.train_model(X, y)
 
     @staticmethod
-    def get_best_model(self, models: [ClassificationContext], X, y) -> ClassificationContext:
+    def get_best_model(models: [ClassificationContext], X, y) -> ClassificationContext:
         best_model_score = 0
         best_model = None
         for model in models:
