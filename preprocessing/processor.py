@@ -60,17 +60,6 @@ class DataProcessor:
         return X
 
     @staticmethod
-    def load_data(file_path):
-        """Loads the data from the specified location"""
-        df = pd.read_csv(file_path)
-        return df
-
-    @staticmethod
-    def save_data(file_path, df):
-        """Saves the data to a specified location"""
-        df.to_csv(file_path, index=False)
-
-    @staticmethod
     def renaming_cols(data_frame: pd.DataFrame):
         df = data_frame
         # convert the dtype object to unicode string

@@ -13,39 +13,6 @@ class Utils:
     def __init__(self):
         pass
 
-    def load_values(self, file_path):
-        if self.exists_file(file_path):
-            data_frame = DataProcessor.load_data(file_path)
-            data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ts")
-            data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ic")
-        else:
-            file_path = DataProcessor.PATH_TO_APP if "App" in file_path else DataProcessor.PATH_TO_PURCHASES
-            data_frame = DataProcessor.load_data(file_path)
-            data_frame = DataProcessor.renaming_cols(data_frame)
-            data_frame = self.preprocess_data(data_frame)
-            # Save preprocessed data frame for reuse
-            DataProcessor.save_data(file_path, data_frame)
-
-            data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ts")
-            data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ic")
-
-        return data_frame
-
-    def exists_file(self, file_path) -> bool:
-        """Checks if the specified file exists"""
-        return os.path.isfile(file_path)
-
-    def preprocess_data(self, data_frame):
-        # De-duplicate input data
-        data_frame =  DataProcessor.de_duplication(data_frame)
-        data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ts")
-        data_frame = DataProcessor.replace_nan_data_in_column(data_frame, "x_ic")
-        # Translate
-        data_frame = DataProcessor.translate_data_frame(data_frame)
-        # remove noise in input data
-        data_frame = DataProcessor.remove_noise(data_frame)
-        return data_frame
-
     @staticmethod
     def instantiate_all_models() -> [ClassificationContext]:
         models = []

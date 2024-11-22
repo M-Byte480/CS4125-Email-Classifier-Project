@@ -1,7 +1,7 @@
 # This is a main file: The controller. All methods will directly on directly be called here
 import os
 import sys
-import pandas as pd
+from torchgen.utils import FileManager
 
 from model.factory.classification_factory import ClassificationContextFactory
 from observers.results_displayer import ResultsDisplayer
@@ -11,6 +11,7 @@ from model.classification_context import *
 from utilities.logger.error_logger import ErrorLogger
 from utilities.utility import Utils
 from utilities.configuration.config import Config
+from utilities.file_manager import FileManager
 
 class Main:
     def __init__(self):
@@ -27,19 +28,12 @@ class Main:
             -c <path/to/file.csv> : Classifies emails in the file at the specified location (trained models are required for this to work).
     Make sure to specify only one of -t, -r, or -u, otherwise you may overwrite previously loaded models!""")
 
-    def load_training_data(self):
-        app_data_frame = self.utils.load_values(DataProcessor.PATH_TO_APP_PREPROCESSED)
-        pur_data_frame_ = self.utils.load_values(DataProcessor.PATH_TO_PURCHASES_PREPROCESSED)
-        combined_data_frame = pd.concat([app_data_frame, pur_data_frame_], axis=0, ignore_index=True)
-
-        return combined_data_frame
-
     @staticmethod
-    def main():
+    def main(args):
         main = Main()
-        args = sys.argv
         error_logger = ErrorLogger("Main")
         logger = InfoLogger("Main")
+        file_manager = FileManager()
 
         # Args are necessary
         if len(args) <= 1:
@@ -59,8 +53,24 @@ class Main:
 
         # This array is used to store trained models for classification
         models = []
-        # Load training data
-        df = main.load_training_data()
+
+        # Load existing preprocessing data or preprocess training data
+        if file_manager.exists_file(Config.PREPROCESSED_DATA_PATH):
+            df = file_manager.load_csv(Config.PREPROCESSED_DATA_PATH)
+            df = DataProcessor.replace_nan_data_in_column(df, "x_ts")
+            df = DataProcessor.replace_nan_data_in_column(df, "x_ic")
+        else:
+            df = file_manager.load_all_csvs_in_directory("data/training_data")
+            # Preprocess the training data
+            df = DataProcessor.renaming_cols(df)
+            df = DataProcessor.de_duplication(df)
+            df = DataProcessor.replace_nan_data_in_column(df, "x_ts")
+            df = DataProcessor.replace_nan_data_in_column(df, "x_ic")
+            df = DataProcessor.translate_data_frame(df)
+            df = DataProcessor.remove_noise(df)
+            # Save the preprocessed data for re-use
+            file_manager.save_csv(df, Config.PREPROCESSED_DATA_PATH)
+
         vectoriser = VectoriserManager()
         vectoriser.fit_vectoriser(df["x_ic"])
         X, y = vectoriser.vectorize_data(df)
@@ -143,7 +153,7 @@ class Main:
             file_path = str(args[args.index("-c") + 1])
 
             try:
-                email_df = DataProcessor.load_data(file_path)
+                email_df = FileManager.load_csv(file_path)
                 email_df = DataProcessor.renaming_cols(email_df)
                 email_df = DataProcessor.translate_data_frame(email_df)
                 X = vectoriser.vectorize_unclassified_data(email_df)
@@ -174,4 +184,5 @@ class Main:
 
 
 if __name__ == '__main__':
-    Main.main()
+    args = sys.argv
+    Main.main(args)

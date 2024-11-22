@@ -11,3 +11,6 @@ class Config:
     TYPE_COLS = ['Type 3', 'Type 4']
     CLASS_COL = 'Type 2'
     GROUPED = 'Type 1'
+
+    # Where preprocessed data is saved
+    PREPROCESSED_DATA_PATH = 'data/preprocessed_data/preprocessed.csv'
