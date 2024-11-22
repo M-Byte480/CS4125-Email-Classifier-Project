@@ -6,6 +6,7 @@ from model.classification_context import ClassificationContext
 from model.factory.classification_factory import ClassificationContextFactory
 from preprocessing.processor import DataProcessor
 from utilities.logger.error_logger import ErrorLogger
+from utilities.logger.warning_logger import WarningLogger
 
 
 class Utils:
@@ -58,13 +59,7 @@ class Utils:
 
     @staticmethod
     def train_models(models: [ClassificationContext], X, y) -> None:
-        error_logger = ErrorLogger("DataProcessor")
-
         for model in models:
-            unique_classes = np.unique(y)
-            if len(unique_classes) < 2 and model._strategy.__class__.__name__ in ["NaiveBayesClassifier", "LogisticRegressionClassifier", "SVMClassifier"]:
-                print(f"Skipping training for {model}: only one class present ({unique_classes[0]})")
-                continue
             model.train_model(X, y)
 
     @staticmethod
@@ -72,12 +67,6 @@ class Utils:
         best_model_score = 0
         best_model = None
         for model in models:
-            unique_classes = np.unique(y)
-            if len(unique_classes) < 2 and model._strategy.__class__.__name__ in ["NaiveBayesClassifier",
-                                                                                  "LogisticRegressionClassifier",
-                                                                                  "SVMClassifier"]:
-                print(f"Skipping Validation for {model}: only one class present ({unique_classes[0]})")
-                continue
             model_score = model.evaluate_model(X, y)
             if model_score > best_model_score:
                 best_model_score = model_score

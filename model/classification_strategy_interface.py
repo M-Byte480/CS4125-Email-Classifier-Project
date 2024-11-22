@@ -1,9 +1,6 @@
 # Strategy Pattern - Interface
 from abc import ABC, abstractmethod
 
-from structs.objects import Email
-
-
 class IClassificationStrategy(ABC):
     @abstractmethod
     def train(self, X, y):
