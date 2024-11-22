@@ -3,6 +3,10 @@ import numpy as np
 from typing import override
 
 from observers.email_classification_observer import EmailClassificationObserver
+from utilities.logger.abstract_logger import AbstractLogger
+from utilities.logger.indentation_decorator import IndentationDecorator
+from utilities.logger.info_logger import InfoLogger
+
 
 # StatisticsCollector keeps track of classification statistics for an email classifier.
 class StatisticsCollector(EmailClassificationObserver):
@@ -12,6 +16,7 @@ class StatisticsCollector(EmailClassificationObserver):
     _label_4_stats: dict[str, int]
     _unclassified: int
     _total_classifications: int
+    logger: AbstractLogger = InfoLogger("StatisticsCollector")
 
     def __init__(self):
         self._label_1_stats = {"AppGallery &amp; Games ": 0, "In-App Purchase ": 0}
@@ -37,35 +42,37 @@ class StatisticsCollector(EmailClassificationObserver):
     def display_stats(self) -> None:
         """Print out a report of collected statistics."""
         total_emails_classified = self._total_classifications // 4
-
-        print(f"Statistics report:")
+        self.logger.log(f"Statistics report:")
+        layer_1 = IndentationDecorator(self.logger)
+        layer_2 = IndentationDecorator(layer_1)
         if sum(self._label_1_stats.values()) > 0:
-            print("\n   Type 1:")
+            layer_1.log("Type 1:")
             for key, value in self._label_1_stats.items():
                 percentage = np.round(value / sum(self._label_1_stats.values()) * 100, 2)
-                print(f"    - {key.ljust(47)}: {value} | {percentage}%")
+                layer_2.log(f"- {key.ljust(47)}: {value} | {percentage}%")
 
         if sum(self._label_2_stats.values()) > 0:
-            print("\n   Type 2:")
+            layer_1.log("Type 2:")
             for key, value in self._label_2_stats.items():
                 percentage = np.round(value / sum(self._label_2_stats.values()) * 100, 2)
-                print(f"    - {key.ljust(47)}: {value} | {percentage}%")
+                layer_2.log(f"- {key.ljust(47)}: {value} | {percentage}%")
 
         if sum(self._label_3_stats.values()) > 0:
-            print("\n   Type 3:")
+            layer_1.log("Type 3:")
             for key, value in self._label_3_stats.items():
                 percentage = np.round(value / sum(self._label_3_stats.values()) * 100, 2)
-                print(f"    - {key.ljust(47)}: {value} | {percentage}%")
+                layer_2.log(f"- {key.ljust(47)}: {value} | {percentage}%")
 
         if sum(self._label_4_stats.values()) > 0:
-            print("\n   Type 4:")
+            layer_1.log("Type 4:")
             for key, value in self._label_4_stats.items():
                 percentage = np.round(value / sum(self._label_4_stats.values()) * 100, 2)
-                print(f"    - {key.ljust(47)}: {value} | {percentage}%")
+                layer_2.log(f"- {key.ljust(47)}: {value} | {percentage}%")
 
-        print(f"\nTotal classifications made:   {self._total_classifications}")
-        print(f"Total emails classified:      {total_emails_classified}")
-        print(f"Total unclassified labels:    {self._unclassified}")
+        layer_1.log()
+        layer_1.log(f"Total classifications made: {total_emails_classified}")
+        layer_1.log(f"Total emails classified: {total_emails_classified}")
+        layer_1.log(f"Total unclassified labels: {self._unclassified}")
 
     def _update_stats(self, classification: str) -> None:
         """Update statistics."""
