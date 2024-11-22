@@ -68,14 +68,3 @@ class OldTranslator:
                     warning_logger.log(f"{warning.message}")
 
         return text_en_l
-
-#Adapter to use legacy code on new interface
-class TranslatorAdaptor(OldTranslator):
-
-    texts : np.array
-
-    def __init__(self, texts : list):
-        self.texts = np.array(texts)
-
-    def trans_to_en(self):
-        return super().trans_to_en(self.texts)
