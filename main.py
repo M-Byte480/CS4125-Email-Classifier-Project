@@ -5,7 +5,7 @@ import pandas as pd
 
 from observers.results_displayer import ResultsDisplayer
 from observers.statistics_collector import StatisticsCollector
-from preprocessing.processor import DataProcessor
+from preprocessing.processor import DataProcessor, VectoriserManager
 from model.classification import *
 from utilities.utility import load_values, instantiate_all_models, get_best_model, train_models
 from utilities.configuration.config import Config
@@ -24,7 +24,8 @@ def load_training_data():
     app_data_frame = load_values(DataProcessor.PATH_TO_APP_PREPROCESSED)
     pur_data_frame_ = load_values(DataProcessor.PATH_TO_PURCHASES_PREPROCESSED)
     combined_data_frame = pd.concat([app_data_frame, pur_data_frame_], axis=0, ignore_index=True)
-    return processor.vectorize_data(combined_data_frame)
+
+    return combined_data_frame
 
 if __name__ == '__main__':
 
@@ -49,8 +50,11 @@ Trainable models:
 
     # This array is used to store trained models for classification
     models = []
-    # We need to use the same processor with the same vectoriser
-    processor = DataProcessor()
+    # Load training data
+    df = load_training_data()
+    vectoriser = VectoriserManager()
+    vectoriser.fit_vectoriser(df["x_ic"])
+    X, y = vectoriser.vectorize_data(df)
 
     # Train a specific model
     if '-t' in args:
@@ -61,7 +65,6 @@ Trainable models:
             exit(1)
 
         model_name = str(args[args.index('-t') + 1])
-        X, y = load_training_data()
 
         for label_name, y_val in y.items():
             print(f"Training model for {label_name}...")
@@ -72,34 +75,31 @@ Trainable models:
                 exit(1)
 
             # Remove unlabelled rows
-            X_trimmed, y_val = DataProcessor.remove_nan_rows(X, y_val)
-            y_val = y_val.astype(str)
+            X_trimmed, y_trim_val = DataProcessor.remove_nan_rows(X, y_val)
+            y_trim_val = y_trim_val.astype(str)
 
             # Train models on the current task
-            model_context.train_model(X_trimmed, y_val)
+            model_context.train_model(X_trimmed, y_trim_val)
 
             # Add model
             models.append(model_context)
 
     # Train best performing models for each label and save them
     if '-r' in args:
-        # Loading data and preprocessing if needed
-        X, y = load_training_data()
-
         for label_name, y_val in y.items():
             print(f"Training models for {label_name}...")
             # Instantiate fresh models for this task
             candidates = instantiate_all_models()
 
             # Remove unlabelled rows
-            X_trimmed, y_val = DataProcessor.remove_nan_rows(X, y_val)
-            y_val = y_val.astype(str)
+            X_trimmed, y_trim_val = DataProcessor.remove_nan_rows(X, y_val)
+            y_trim_val = y_trim_val.astype(str)
 
             # Train models on the current task
-            train_models(candidates, X_trimmed, y_val)
+            train_models(candidates, X_trimmed, y_trim_val)
 
             # Get the best-performing model for this task
-            best_model = get_best_model(candidates, X_trimmed, y_val)
+            best_model = get_best_model(candidates, X_trimmed, y_trim_val)
             models.append(best_model)
 
             os.makedirs(Config.TRAINED_MODELS_DIR, exist_ok=True)
@@ -124,9 +124,6 @@ Trainable models:
             model_context.load_model(os.path.join(Config.TRAINED_MODELS_DIR, model_path))
             models.append(model_context)
 
-        # We have to load/preprocess data to fit our vectoriser
-        load_training_data()
-
     # Classify emails in the specified CSV
     if "-c" in args:
         # If file path not specified exit
@@ -140,7 +137,7 @@ Trainable models:
             email_df = DataProcessor.load_data(file_path)
             email_df = DataProcessor.renaming_cols(email_df)
             email_df = DataProcessor.translate_data_frame(email_df)
-            X = processor.vectorize_unclassified_data(email_df)
+            X = vectoriser.vectorize_unclassified_data(email_df)
         except Exception as e:
             print(e)
             print("""
