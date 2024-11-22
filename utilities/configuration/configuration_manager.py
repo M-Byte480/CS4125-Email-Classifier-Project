@@ -1,4 +1,6 @@
-from Config import Config
+# todo: we should be using our singleton
+
+from utilities.configuration.config import Config
 
 # Singleton instance
 class ConfigurationManager:

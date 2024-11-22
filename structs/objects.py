@@ -1,3 +1,5 @@
+# todo: review unused file
+
 import string
 
 class Email:

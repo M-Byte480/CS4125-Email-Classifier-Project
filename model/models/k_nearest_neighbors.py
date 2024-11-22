@@ -1,11 +1,10 @@
-from sklearn.tree import DecisionTreeClassifier
-
+from sklearn.neighbors import KNeighborsClassifier
 from model.models.base import BaseModel
 
-class DecisionTreeModel(BaseModel):
+class KNearestNeighborsModel(BaseModel):
     def __init__(self) -> None:
         super().__init__()
-        self.model = DecisionTreeClassifier()
+        self.model = KNeighborsClassifier()
 
     def train(self, X, y) -> None:
         print(f"Training {self.__class__.__name__} model...")
@@ -13,8 +12,5 @@ class DecisionTreeModel(BaseModel):
 
     def predict(self, X) -> list:
         print(f"Predicting using {self.__class__.__name__}...")
-        predictions = self.model.predict(X)#
+        predictions = self.model.predict(X)
         return predictions
-
-    def __str__(self):
-        return "decision_tree"

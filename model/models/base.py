@@ -1,37 +1,34 @@
 from abc import ABC, abstractmethod
-
-import pandas as pd
-import numpy as np
-
+import joblib
 
 class BaseModel(ABC):
     def __init__(self) -> None:
+        self.model = None
         ...
-
 
     @abstractmethod
     def train(self, X, y) -> None:
         """
-        Train the model using ML Models for Multi-class and mult-label classification.
-        :params: df is essential, others are model specific
+        Train the model using ML Models for multi-class and multi-label classification.
+        :params: X, y is essential, others are model specific
         :return: classifier
         """
         ...
 
     @abstractmethod
-    def predict(self, X) -> int:
+    def predict(self, X) -> list:
         """
-
+        Make prediction using the trained ML Model for multi-class and multi-label classification.
+        :params: X is essential, others are model specific
+        :return: prediction
         """
         ...
 
-    @abstractmethod
-    def data_transform(self, Z) -> None:
-        return
+    def save(self, path) -> None:
+        joblib.dump(self.model, path)
 
-    # def build(self, values) -> BaseModel:
-    def build(self, values={}):
-        values = values if isinstance(values, dict) else utils.string2any(values)
-        self.__dict__.update(self.defaults)
-        self.__dict__.update(values)
-        return self
+    def load(self, path) -> None:
+        self.model = joblib.load(path)
+
+    def __str__(self):
+        return str(self.model)
