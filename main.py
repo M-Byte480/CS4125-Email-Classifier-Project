@@ -151,9 +151,8 @@ class Main:
                 exit(1)
 
             file_path = str(args[args.index("-c") + 1])
-
+            email_df = file_manager.load_csv(file_path)
             try:
-                email_df = FileManager.load_csv(file_path)
                 email_df = DataProcessor.renaming_cols(email_df)
                 email_df = DataProcessor.translate_data_frame(email_df)
                 X = vectoriser.vectorize_unclassified_data(email_df)
