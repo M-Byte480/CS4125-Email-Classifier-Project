@@ -1,7 +1,6 @@
 from colorama import Fore
 
 from utilities.logger.abstract_logger import AbstractLogger
-from utilities.logger.decorators.bold_decorator import BoldDecorator
 from utilities.logger.decorators.colour_decorator import ColourDecorator
 from utilities.logger.decorators.italics_decorator import ItalicsDecorator
 

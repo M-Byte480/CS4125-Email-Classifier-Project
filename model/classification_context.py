@@ -1,7 +1,6 @@
 from model.classifier import Classifier
 
 from observers.email_classification_observer import EmailClassificationObserver
-from utilities.logger.decorators.indentation_decorator import IndentationDecorator
 from utilities.logger.concrete_logger.info_logger import InfoLogger
 from utilities.logger.decorators.prefix_decorator import PrefixLogger
 

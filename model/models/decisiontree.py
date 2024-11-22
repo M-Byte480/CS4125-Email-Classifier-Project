@@ -1,7 +1,6 @@
 from sklearn.tree import DecisionTreeClassifier
 
 from model.models.base import BaseModel
-from utilities.logger.concrete_logger.info_logger import InfoLogger
 from utilities.logger.decorators.prefix_decorator import PrefixLogger
 
 

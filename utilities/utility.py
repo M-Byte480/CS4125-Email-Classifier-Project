@@ -7,7 +7,7 @@ class Utils:
 
     @staticmethod
     def instantiate_all_models() -> [ClassificationContext]:
-        models = []
+        models = list()
         models.append(ClassificationContextFactory.create_context("naive_bayes"))
         models.append(ClassificationContextFactory.create_context("decision_tree"))
         models.append(ClassificationContextFactory.create_context("random_forest"))
