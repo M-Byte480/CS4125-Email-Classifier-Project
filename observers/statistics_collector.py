@@ -4,6 +4,7 @@ import numpy as np
 from observers.email_classification_observer import EmailClassificationObserver
 from utilities.logger.decorators.indentation_decorator import IndentationDecorator
 from utilities.logger.concrete_logger.info_logger import InfoLogger
+from utilities.logger.decorators.prefix_decorator import PrefixLogger
 
 
 # StatisticsCollector keeps track of classification statistics for an email classifier.
@@ -40,8 +41,9 @@ class StatisticsCollector(EmailClassificationObserver):
         """Print out a report of collected statistics."""
         total_emails_classified = self._total_classifications // 4
 
-        self.info_logger.log(f"Statistics report:")
-        layer_1 = IndentationDecorator(self.info_logger)
+        decorated_logger = PrefixLogger(self.info_logger, "StatisticsCollector")
+        decorated_logger.log(f"Statistics report:")
+        layer_1 = IndentationDecorator(decorated_logger)
         layer_2 = IndentationDecorator(layer_1)
 
         if sum(self._label_1_stats.values()) > 0:
