@@ -1,13 +1,5 @@
-# todo: review unused file
+from notifiers.observer.observer import Observer
 
-from abc import ABC, abstractmethod
-
-from structs.objects import Email
-
-class Observer(ABC):
-    @abstractmethod
-    def update(self, email: Email, classification):
-        pass
 
 class EmailClassifier:
     def __init__(self):
@@ -27,11 +19,3 @@ class EmailClassifier:
         for observer in self._observers:
             observer.update(email, classification)
 
-# Concrete Observer Example
-class LoggingService(Observer):
-    def update(self, email, classification):
-        print(f"LoggingService: Email '{email}' classified as '{classification}'")
-
-class NotificationService(Observer):
-    def update(self, email, classification):
-        print(f"NotificationService: Sending notification for email '{email}' classified as '{classification}'")
