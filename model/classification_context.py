@@ -1,19 +1,6 @@
-from abc import ABC, abstractmethod
-from typing import override
-
-from sklearn.metrics import accuracy_score
-
-from model.classification_strategy_interface import IClassificationStrategy
 from model.classifier import Classifier
-from model.models.base import BaseModel
-from model.models.SVM import SVMModel
-from model.models.decisiontree import DecisionTreeModel
-from model.models.k_nearest_neighbors import KNearestNeighborsModel
-from model.models.logistic_regression import LogisticRegressionModel
-from model.models.naive_bayes import NaiveBayesModel
-from model.models.randomforest import RandomForest
+
 from observers.email_classification_observer import EmailClassificationObserver
-from structs.objects import Email
 from utilities.logger.indentation_decorator import IndentationDecorator
 from utilities.logger.info_logger import InfoLogger
 

@@ -2,7 +2,8 @@ import os
 
 import numpy as np
 
-from model.classification_context import ClassificationContext, ClassificationContextFactory
+from model.classification_context import ClassificationContext
+from model.factory.classification_factory import ClassificationContextFactory
 from preprocessing.processor import DataProcessor
 from utilities.logger.error_logger import ErrorLogger
 

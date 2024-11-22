@@ -1,5 +1,5 @@
 # Strategy Pattern - Interface
-from abc import ABC
+from abc import ABC, abstractmethod
 
 from structs.objects import Email
 

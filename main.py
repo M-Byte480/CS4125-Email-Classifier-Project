@@ -3,6 +3,7 @@ import os
 import sys
 import pandas as pd
 
+from model.factory.classification_factory import ClassificationContextFactory
 from observers.results_displayer import ResultsDisplayer
 from observers.statistics_collector import StatisticsCollector
 from preprocessing.processor import DataProcessor, VectoriserManager
