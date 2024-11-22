@@ -6,7 +6,7 @@ class IClassificationStrategy(ABC):
     def train(self, X, y):
         pass
     @abstractmethod
-    def classify(self, email: Email):
+    def classify(self, email_data):
         pass
     @abstractmethod
     def evaluate(self, X, y):
