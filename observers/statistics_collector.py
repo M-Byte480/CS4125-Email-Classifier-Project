@@ -70,7 +70,7 @@ class StatisticsCollector(EmailClassificationObserver):
                 layer_2.log(f"- {key.ljust(47)}: {value} | {percentage}%")
 
         layer_1.log()
-        layer_1.log(f"Total classifications made: {total_emails_classified}")
+        layer_1.log(f"Total classifications made: {self._total_classifications}")
         layer_1.log(f"Total emails classified: {total_emails_classified}")
         layer_1.log(f"Total unclassified labels: {self._unclassified}")
 
