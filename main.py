@@ -160,11 +160,12 @@ class Main:
                 X = vectoriser.vectorize_unclassified_data(email_df)
             except Exception as e:
                 error_logger.log(str(e))
-                error_logger.log("""
-        Error in processing of data
+                error_logger.log(traceback.format_exc())
+                error_logger.log("""Error in processing of data
         Make sure in your CSV you have the at least the following columns:
             - Ticket Summary
             - Interaction Content""")
+
                 exit(1)
 
             logger.log(f"Classifying emails in {file_path}")
