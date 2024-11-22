@@ -2,11 +2,10 @@ import numpy as np
 import pandas as pd
 
 from sklearn.feature_extraction.text import TfidfVectorizer
+
+from preprocessing.oldtranslator import OldTranslator
 from utilities.configuration.config import Config
-from utilities.logger.concrete_logger.error_logger import ErrorLogger
-from utilities.logger.decorators.prefix_decorator import PrefixLogger
-from utilities.logger.concrete_logger.warning_logger import WarningLogger
-from oldtranslator import OldTranslator
+
 
 
 # Singleton instance

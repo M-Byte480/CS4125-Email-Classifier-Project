@@ -4,16 +4,24 @@ import stanza
 from stanza.pipeline.core import DownloadMethod
 from transformers import M2M100ForConditionalGeneration, M2M100Tokenizer
 
-from utilities.logger.error_logger import ErrorLogger
-from utilities.logger.indentation_decorator import IndentationDecorator
-from utilities.logger.warning_logger import WarningLogger
+from utilities.logger.concrete_logger.error_logger import ErrorLogger
+from utilities.logger.concrete_logger.warning_logger import WarningLogger
+from utilities.logger.decorators.prefix_decorator import PrefixLogger
+
 
 #The legacy translator code, which we need to adapt wo work with a list-based interface
 class OldTranslator:
     @staticmethod
     def trans_to_en(texts : np.array):
-        error_logger = IndentationDecorator(ErrorLogger("Translator"), "[trans_to_en]")
-        warning_logger = IndentationDecorator(WarningLogger("Translator"), "[trans_to_en]")
+        error_logger = ErrorLogger()
+        warning_logger = WarningLogger()
+
+        error_logger = PrefixLogger(error_logger, "DataProcessor")
+        warning_logger = PrefixLogger(warning_logger, "DataProcessor")
+
+        error_logger = PrefixLogger(error_logger, "trans_to_en")
+        warning_logger = PrefixLogger(warning_logger, "trans_to_en")
+
         with warnings.catch_warnings(record=True) as caught_warning:
 
             t2t_m = "facebook/m2m100_418M"
