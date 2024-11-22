@@ -7,6 +7,17 @@ from transformers import M2M100ForConditionalGeneration, M2M100Tokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from utilities.configuration.config import Config
 
+# Singleton instance
+class VectoriserManager:
+    instance = None
+
+    def __new__(cls):
+        if cls.instance is None: # If instance is not created, create it
+            cls.instance = super(VectoriserManager, cls).__new__(cls)
+            cls.instance.data_processor = DataProcessor()
+            return cls.instance.data_processor
+        return cls.instance.data_processor
+
 class DataProcessor:
     PATH_TO_APP = "data/AppGallery.csv"
     PATH_TO_PURCHASES = "data/Purchasing.csv"
@@ -14,9 +25,12 @@ class DataProcessor:
     PATH_TO_PURCHASES_PREPROCESSED = "data/PurchasingPreprocessed.csv"
     tfidfconverter = TfidfVectorizer(max_features=2000, min_df=4, max_df=0.90)
 
+    def fit_vectoriser(self, column_data):
+        return self.tfidfconverter.fit(column_data)
+
     def vectorize_data(self, data_frame):
         ## Step 6: Textual data numerically:
-        x_ic = self.tfidfconverter.fit_transform(data_frame["x_ic"]).toarray()
+        x_ic = self.tfidfconverter.transform(data_frame["x_ic"]).toarray()
         x_ts = self.tfidfconverter.transform(data_frame["x_ts"]).toarray()
         X = np.concatenate((x_ic, x_ts), axis=1)
         # remove bad test cases from test dataset
