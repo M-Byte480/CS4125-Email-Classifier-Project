@@ -1,13 +1,13 @@
 from sklearn.neighbors import KNeighborsClassifier
 from model.models.base import BaseModel
-from utilities.logger.info_logger import InfoLogger
+from utilities.logger.decorators.prefix_decorator import PrefixLogger
+
 
 class KNearestNeighborsModel(BaseModel):
-    logger = InfoLogger("KNearestNeighborsModel")
-
     def __init__(self) -> None:
         super().__init__()
         self.model = KNeighborsClassifier()
+        self.logger = PrefixLogger(self.logger, "KNearestNeighborsModel")
 
     def train(self, X, y) -> None:
         self.model.fit(X, y)

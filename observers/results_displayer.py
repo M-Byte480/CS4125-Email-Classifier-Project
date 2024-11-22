@@ -1,34 +1,23 @@
-from typing import override
 
 from observers.email_classification_observer import EmailClassificationObserver
-from utilities.logger.abstract_logger import AbstractLogger
-from utilities.logger.indentation_decorator import IndentationDecorator
-from utilities.logger.info_logger import InfoLogger
+from utilities.logger.decorators.indentation_decorator import IndentationDecorator
+from utilities.logger.concrete_logger.info_logger import InfoLogger
+from utilities.logger.decorators.prefix_decorator import PrefixLogger
 
 
 class ResultsDisplayer(EmailClassificationObserver):
-    logger: AbstractLogger = InfoLogger("ResultsDisplayer")
-    @override
+    info_logger = InfoLogger()
+
     def update(self, ts, ic, classification: str) -> None:
         self._display(ts, ic, classification)
 
     def _display(self, ts, ic, classification: str) -> None:
-        indentation_logger = IndentationDecorator(ResultsDisplayer.logger, "[ResultsDisplayer]")
         """Print classification result."""
-        ResultsDisplayer.logger.log(f"Email classification result:")
-        indentation_logger.log(f"Ticket summary: {ts}")
-        indentation_logger.log(f"Interaction content: {ic}")
-        indentation_logger.log(f"Classification: {classification}")
-        indentation_logger.log("=" * 75)
+        display_logger = PrefixLogger(ResultsDisplayer.info_logger, "ResultsDisplayer")
+        display_logger = IndentationDecorator(display_logger)
 
-# todo: review unused class
-class DisplayResultsCommand:
-    disp : ResultsDisplayer
-    classy : EmailClassificationObserver
-
-    def __init__(self, d: ResultsDisplayer, c : EmailClassificationObserver):
-        self.disp = d
-        self.classy = c
-
-    def execute(self):
-        self.disp.update(self.classy)
+        display_logger.log(f"Email classification result:")
+        display_logger.log(f"Ticket summary: {ts}")
+        display_logger.log(f"Interaction content: {ic}")
+        display_logger.log(f"Classification: {classification}")
+        display_logger.log("=" * 75)

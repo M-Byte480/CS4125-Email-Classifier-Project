@@ -1,13 +1,15 @@
 # This is a main file: The controller. All methods will directly on directly be called here
 import os
 import sys
+import traceback
 
 from model.factory.classification_factory import ClassificationContextFactory
 from observers.results_displayer import ResultsDisplayer
 from observers.statistics_collector import StatisticsCollector
 from preprocessing.processor import DataProcessor, VectoriserManager
-from model.classification_context import *
-from utilities.logger.error_logger import ErrorLogger
+from utilities.logger.concrete_logger.error_logger import ErrorLogger
+from utilities.logger.concrete_logger.info_logger import InfoLogger
+from utilities.logger.decorators.prefix_decorator import PrefixLogger
 from utilities.utility import Utils
 from utilities.configuration.config import Config
 from utilities.file_manager import FileManager
@@ -17,8 +19,7 @@ class Main:
         self.utils = Utils()
         pass
 
-
-    def print_usage(logger) -> None:
+    def print_usage(self, logger) -> None:
         logger.log("""Usage: python main.py
             -t <model-name>       : Trains the specified model for all labels. These models are not saved and are for one time use.
             -l                    : Lists all trainable models.
@@ -30,8 +31,10 @@ class Main:
     @staticmethod
     def main(args):
         main = Main()
-        error_logger = ErrorLogger("Main")
-        logger = InfoLogger("Main")
+        error_logger = ErrorLogger()
+        error_logger = PrefixLogger(error_logger, "MAIN")
+        logger = InfoLogger()
+        logger = PrefixLogger(logger, "MAIN")
         file_manager = FileManager()
 
         # Args are necessary
@@ -83,9 +86,9 @@ class Main:
                 exit(1)
 
             model_name = str(args[args.index('-t') + 1])
-
+            training_logger = PrefixLogger(logger, "TRAINING")
             for label_name, y_val in y.items():
-                logger.log(f"Training model for {label_name}...")
+                training_logger.log(f"Training model for {label_name}...")
                 try:
                     model_context = ClassificationContextFactory.create_context(model_name)
                 except ValueError as e:
@@ -157,11 +160,12 @@ class Main:
                 X = vectoriser.vectorize_unclassified_data(email_df)
             except Exception as e:
                 error_logger.log(str(e))
-                error_logger.log("""
-        Error in processing of data
+                error_logger.log(traceback.format_exc())
+                error_logger.log("""Error in processing of data
         Make sure in your CSV you have the at least the following columns:
             - Ticket Summary
             - Interaction Content""")
+
                 exit(1)
 
             logger.log(f"Classifying emails in {file_path}")

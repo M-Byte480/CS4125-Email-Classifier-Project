@@ -1,19 +1,21 @@
 from model.classifier import Classifier
 
 from observers.email_classification_observer import EmailClassificationObserver
-from utilities.logger.indentation_decorator import IndentationDecorator
-from utilities.logger.info_logger import InfoLogger
+from utilities.logger.concrete_logger.info_logger import InfoLogger
+from utilities.logger.decorators.prefix_decorator import PrefixLogger
+
 
 # Strategy Pattern - Context
 class ClassificationContext:
     strategy: Classifier
-    logger: InfoLogger
     _observers: [EmailClassificationObserver]  # Array of subscribed observers
 
     def __init__(self, strategy: Classifier) -> None:
         self._strategy = strategy
         self._observers = []
-        self.logger = IndentationDecorator(strategy.model.logger)
+        self.info_logger = InfoLogger()
+        self.info_logger = PrefixLogger(self.info_logger, "ClassificationContext")
+        self.info_logger.log("Classification Context initialized with strategy:" + str(strategy))
 
     def set_strategy(self, strategy: Classifier) -> None:
         """Allows switching the strategy dynamically."""

@@ -1,15 +1,13 @@
 from abc import ABC, abstractmethod
 import joblib
 
-from utilities.logger.abstract_logger import AbstractLogger
-from utilities.logger.info_logger import InfoLogger
+from utilities.logger.concrete_logger.info_logger import InfoLogger
 
 
 class BaseModel(ABC):
-    logger: AbstractLogger
     def __init__(self) -> None:
         self.model = None
-        self.logger = InfoLogger("BaseModel")
+        self.logger = InfoLogger()
         ...
 
     @abstractmethod

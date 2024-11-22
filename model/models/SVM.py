@@ -1,14 +1,15 @@
 from sklearn.svm import SVC
 
 from model.models.base import BaseModel
-from utilities.logger.info_logger import InfoLogger
+from utilities.logger.decorators.prefix_decorator import PrefixLogger
+
 
 class SVMModel(BaseModel):
-    logger = InfoLogger("SVMModel")
 
     def __init__(self) -> None:
         super(SVMModel, self).__init__()
         self.model = SVC(probability=True) # SVM with probability support
+        self.logger = PrefixLogger(self.logger, "LogisticRegressionModel")
 
     def train(self, X, y) -> None:
         self.model = self.model.fit(X, y)
