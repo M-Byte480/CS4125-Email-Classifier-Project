@@ -62,7 +62,7 @@ class DataProcessor:
     @staticmethod
     def renaming_cols(data_frame: pd.DataFrame):
         df = data_frame
-        # convert the dtype object to unicode string
+        # convert the dtype object to Unicode string
         df[Config.TICKET_SUMMARY] = df[Config.TICKET_SUMMARY].values.astype('U')
         df[Config.INTERACTION_CONTENT] = df[Config.INTERACTION_CONTENT].values.astype('U')
 

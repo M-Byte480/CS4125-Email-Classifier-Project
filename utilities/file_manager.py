@@ -1,6 +1,5 @@
 import os
 import pandas as pd
-from pandas.core.interchange.dataframe_protocol import DataFrame
 
 class FileManager:
 
@@ -12,14 +11,14 @@ class FileManager:
         df = pd.read_csv(file_path)
         return df
 
-    def save_csv(self, df: DataFrame, file_path: str) -> None:
+    def save_csv(self, df, file_path: str) -> None:
         """
         Saves a DataFrame in the specified location as a csv
         """
         dirs = file_path.split('/')
         dirs.pop()
-        for dir in dirs:
-            os.makedirs(dir, exist_ok=True)
+        for directory in dirs:
+            os.makedirs(directory, exist_ok=True)
         df.to_csv(file_path, index=False)
 
     def load_all_csvs_in_directory(self, directory_path: str) -> pd.DataFrame:

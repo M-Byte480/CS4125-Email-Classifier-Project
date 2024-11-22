@@ -1,5 +1,5 @@
 # This file contains some variable names you need to use in overall project. 
-#For example, this will contain the name of dataframe columns we will working on each file
+# For example, this will contain the name of dataframe columns we will be working with for each file
 class Config:
     TRAINED_MODELS_DIR = 'trained_models'
 

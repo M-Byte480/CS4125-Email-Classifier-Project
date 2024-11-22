@@ -1,7 +1,6 @@
 # This is a main file: The controller. All methods will directly on directly be called here
 import os
 import sys
-from torchgen.utils import FileManager
 
 from model.factory.classification_factory import ClassificationContextFactory
 from observers.results_displayer import ResultsDisplayer
@@ -157,7 +156,7 @@ class Main:
                 email_df = DataProcessor.translate_data_frame(email_df)
                 X = vectoriser.vectorize_unclassified_data(email_df)
             except Exception as e:
-                error_logger.log(e)
+                error_logger.log(str(e))
                 error_logger.log("""
         Error in processing of data
         Make sure in your CSV you have the at least the following columns:
