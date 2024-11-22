@@ -3,9 +3,9 @@ import pandas as pd
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from utilities.configuration.config import Config
-from utilities.logger.error_logger import ErrorLogger
-from utilities.logger.info_logger import InfoLogger
-from utilities.logger.warning_logger import WarningLogger
+from utilities.logger.concrete_logger.error_logger import ErrorLogger
+from utilities.logger.decorators.prefix_decorator import PrefixLogger
+from utilities.logger.concrete_logger.warning_logger import WarningLogger
 from oldtranslator import OldTranslator
 
 
@@ -21,9 +21,6 @@ class VectoriserManager:
         return cls.instance.data_processor
 
 class DataProcessor:
-    error_logger = ErrorLogger("DataProcessor")
-    logger = InfoLogger("DataProcessor")
-    warning_logger = WarningLogger("DataProcessor")
     PATH_TO_APP = "data/AppGallery.csv"
     PATH_TO_PURCHASES = "data/Purchasing.csv"
     PATH_TO_APP_PREPROCESSED = "data/AppGalleryPreprocessed.csv"

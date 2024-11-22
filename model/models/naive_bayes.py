@@ -1,14 +1,15 @@
 from sklearn.naive_bayes import MultinomialNB
 
 from model.models.base import BaseModel
-from utilities.logger.info_logger import InfoLogger
+from utilities.logger.decorators.prefix_decorator import PrefixLogger
+
 
 class NaiveBayesModel(BaseModel):
-    logger = InfoLogger("NaiveBayesModel")
 
     def __init__(self) -> None:
         super().__init__()
         self.model = MultinomialNB()
+        self.logger = PrefixLogger(self.logger, "NaiveBayesModel")
 
     def train(self, X, y) -> None:
         self.model.fit(X, y)

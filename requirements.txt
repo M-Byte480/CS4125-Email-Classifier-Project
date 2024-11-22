@@ -5,3 +5,4 @@ stanza>=1.9.2
 transformers>=4.45.2
 sentencepiece>=0.2.0
 joblib>=1.4.2
+typing

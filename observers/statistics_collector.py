@@ -1,11 +1,9 @@
 import numpy as np
 
-from typing import override
 
 from observers.email_classification_observer import EmailClassificationObserver
-from utilities.logger.abstract_logger import AbstractLogger
-from utilities.logger.indentation_decorator import IndentationDecorator
-from utilities.logger.info_logger import InfoLogger
+from utilities.logger.decorators.indentation_decorator import IndentationDecorator
+from utilities.logger.concrete_logger.info_logger import InfoLogger
 
 
 # StatisticsCollector keeps track of classification statistics for an email classifier.
@@ -16,7 +14,6 @@ class StatisticsCollector(EmailClassificationObserver):
     _label_4_stats: dict[str, int]
     _unclassified: int
     _total_classifications: int
-    logger: AbstractLogger = InfoLogger("StatisticsCollector")
 
     def __init__(self):
         self._label_1_stats = {"AppGallery &amp; Games ": 0, "In-App Purchase ": 0}
@@ -34,17 +31,19 @@ class StatisticsCollector(EmailClassificationObserver):
                                "Payment failed": 0, "Invoice related request": 0, "Risk Control": 0}
         self._unclassified = 0
         self._total_classifications = 0
+        self.info_logger = InfoLogger()
 
-    @override
     def update(self, _, __, classification: str) -> None:
         self._update_stats(classification)
 
     def display_stats(self) -> None:
         """Print out a report of collected statistics."""
         total_emails_classified = self._total_classifications // 4
-        self.logger.log(f"Statistics report:")
-        layer_1 = IndentationDecorator(self.logger)
+
+        self.info_logger.log(f"Statistics report:")
+        layer_1 = IndentationDecorator(self.info_logger)
         layer_2 = IndentationDecorator(layer_1)
+
         if sum(self._label_1_stats.values()) > 0:
             layer_1.log("Type 1:")
             for key, value in self._label_1_stats.items():
