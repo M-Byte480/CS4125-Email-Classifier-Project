@@ -6,7 +6,7 @@ from utilities.configuration.config import Config
 from utilities.logger.error_logger import ErrorLogger
 from utilities.logger.info_logger import InfoLogger
 from utilities.logger.warning_logger import WarningLogger
-from legacycode import TranslatorAdaptor
+from oldtranslator import OldTranslator
 
 
 # Singleton instance
@@ -179,3 +179,14 @@ class DataProcessor:
     def trans_to_en(texts : list):
         ta = TranslatorAdaptor(texts)
         return ta.trans_to_en()
+
+#Adapter to use legacy code on new interface
+class TranslatorAdaptor(OldTranslator):
+
+    texts : np.array
+
+    def __init__(self, texts : list):
+        self.texts = np.array(texts)
+
+    def trans_to_en(self):
+        return super().trans_to_en(self.texts)
