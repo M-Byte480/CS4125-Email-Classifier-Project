@@ -159,7 +159,9 @@ class Main:
         # Classify emails in the specified CSV
         if "-c" in args:
             # If file path not specified exit
-            if args[args.index('-c') + 1] is None:
+            file_path_index = args.index('-c') + 1
+            if file_path_index >= len(args):
+                error_logger.log("File path not found!")
                 main.print_usage(error_logger)
                 exit(1)
 
