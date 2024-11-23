@@ -5,5 +5,5 @@ stanza>=1.9.2
 transformers>=4.45.2
 sentencepiece>=0.2.0
 joblib>=1.4.2
-typing
-colorama
+typing>=3.7.4.3
+colorama>=0.4.6
