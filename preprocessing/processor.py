@@ -20,10 +20,6 @@ class VectoriserManager:
         return cls.instance.data_processor
 
 class DataProcessor:
-    PATH_TO_APP = "data/AppGallery.csv"
-    PATH_TO_PURCHASES = "data/Purchasing.csv"
-    PATH_TO_APP_PREPROCESSED = "data/AppGalleryPreprocessed.csv"
-    PATH_TO_PURCHASES_PREPROCESSED = "data/PurchasingPreprocessed.csv"
     tfidfconverter = TfidfVectorizer(max_features=2000, min_df=4, max_df=0.90)
 
     def fit_vectoriser(self, column_data):
