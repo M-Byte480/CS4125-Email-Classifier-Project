@@ -1,4 +1,4 @@
-# This is a main file: The controller. All methods will directly on directly be called here
+# This is a main file: The controller. All methods will directly or indirectly be called here.
 import os
 import sys
 import traceback
@@ -58,11 +58,21 @@ class Main:
 
         # Load existing preprocessing data or preprocess training data
         if file_manager.exists_file(Config.PREPROCESSED_DATA_PATH):
-            df = file_manager.load_csv(Config.PREPROCESSED_DATA_PATH)
+            try:
+                df = file_manager.load_csv(Config.PREPROCESSED_DATA_PATH)
+            except FileNotFoundError as e:
+                error_logger.log(str(e))
+                error_logger.log(traceback.format_exc())
+                exit(1)
             df = DataProcessor.replace_nan_data_in_column(df, "x_ts")
             df = DataProcessor.replace_nan_data_in_column(df, "x_ic")
         else:
-            df = file_manager.load_all_csvs_in_directory("data/training_data")
+            try:
+                df = file_manager.load_all_csvs_in_directory("data/training_data")
+            except FileNotFoundError as e:
+                error_logger.log(str(e))
+                error_logger.log(traceback.format_exc())
+                exit(1)
             # Preprocess the training data
             df = DataProcessor.renaming_cols(df)
             df = DataProcessor.de_duplication(df)
@@ -92,7 +102,8 @@ class Main:
                 try:
                     model_context = ClassificationContextFactory.create_context(model_name)
                 except ValueError as e:
-                    error_logger.log("Model name invalid!")
+                    error_logger.log(str(e))
+                    error_logger.log("Model name invalid! Use -l to get a list of all trainable model names.")
                     exit(1)
 
                 # Remove unlabelled rows
@@ -153,8 +164,9 @@ class Main:
                 exit(1)
 
             file_path = str(args[args.index("-c") + 1])
-            email_df = file_manager.load_csv(file_path)
+
             try:
+                email_df = file_manager.load_csv(file_path)
                 email_df = DataProcessor.renaming_cols(email_df)
                 email_df = DataProcessor.translate_data_frame(email_df)
                 X = vectoriser.vectorize_unclassified_data(email_df)
@@ -165,7 +177,6 @@ class Main:
         Make sure in your CSV you have the at least the following columns:
             - Ticket Summary
             - Interaction Content""")
-
                 exit(1)
 
             logger.log(f"Classifying emails in {file_path}")
@@ -183,7 +194,6 @@ class Main:
             sc.display_stats()
 
         exit(0)
-
 
 if __name__ == '__main__':
     args = sys.argv
