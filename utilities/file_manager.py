@@ -8,7 +8,10 @@ class FileManager:
         Loads the csv in the specified location
         Returns a DataFrame of the csv
         """
-        df = pd.read_csv(file_path)
+        if (self.exists_file(file_path)):
+            df = pd.read_csv(file_path)
+        else:
+            raise FileNotFoundError(f"File does not exist at location: {file_path}!")
         return df
 
     def save_csv(self, df, file_path: str) -> None:
