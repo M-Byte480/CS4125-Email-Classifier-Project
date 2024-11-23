@@ -26,8 +26,8 @@ class Classifier(IClassificationStrategy, ABC):
 
     def evaluate(self, X, y) -> float:
         y_pred = self.model.predict(X)
-        accuracy = accuracy_score(y, y_pred)
-        self.info_logger.log(f"Accuracy: {accuracy}")
+        accuracy = accuracy_score(y, y_pred) * 100
+        self.info_logger.log(f"Accuracy: {accuracy:.2f}%")
         return accuracy
 
     def save(self, file_path):
