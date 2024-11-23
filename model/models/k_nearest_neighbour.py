@@ -3,7 +3,7 @@ from model.models.base import BaseModel
 from utilities.logger.decorators.prefix_decorator import PrefixLogger
 
 
-class KNearestNeighborsModel(BaseModel):
+class KNearestNeighbourModel(BaseModel):
     def __init__(self) -> None:
         super().__init__()
         self.model = KNeighborsClassifier()
