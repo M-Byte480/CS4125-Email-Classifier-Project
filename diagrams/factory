@@ -1,0 +1,45 @@
+@startuml
+class ClassificationContextFactory {
+    +{static} create_context(strategy: str): ClassificationContext
+}
+
+class ClassificationContext {
+    * strategy: IClassificationStrategy
+    + __init__(strategy: IClassificationStrategy)
+}
+
+interface IClassificationStrategy
+
+abstract Classifier {
+    - model: BaseModel
+    + __init__()
+}
+
+abstract BaseModel
+
+class NaiveBayesClassifier
+class SVMClassifier
+class DecisionTreeClassifier
+class RandomForestClassifier
+class LogisticRegressionClassifier
+class KNearestNeighborsClassifier
+
+NaiveBayesClassifier -up-|> Classifier
+SVMClassifier -up-|> Classifier
+DecisionTreeClassifier -up-|> Classifier
+RandomForestClassifier -up-|> Classifier
+LogisticRegressionClassifier -up-|> Classifier
+KNearestNeighborsClassifier -up-|> Classifier
+
+Classifier -down-* BaseModel
+
+ClassificationContext *-- IClassificationStrategy
+ClassificationContextFactory ..> ClassificationContext : "creates"
+ClassificationContextFactory ..> NaiveBayesClassifier : "uses"
+ClassificationContextFactory ..> SVMClassifier : "uses"
+ClassificationContextFactory ..> DecisionTreeClassifier : "uses"
+ClassificationContextFactory ..> RandomForestClassifier : "uses"
+ClassificationContextFactory ..> LogisticRegressionClassifier : "uses"
+ClassificationContextFactory ..> KNearestNeighborsClassifier : "uses"
+
+@enduml
