@@ -1,0 +1,46 @@
+@startuml
+interface IClassificationStrategy
+abstract Classifier
+abstract BaseModel
+class ClassificationContext
+
+IClassificationStrategy <|.. Classifier
+
+class SVMModel
+class RandomForestModel
+class DecisionTreeModel
+class NaiveBayesModel
+class LogisticRegressionModel
+class KNearestNeighborsModel
+
+class SVMClassifier
+class RandomForestClassifier
+class DecisionTreeClassifier
+class NaiveBayesClassifier
+class LogisticRegressionClassifier
+class KNearestNeighborsClassifier
+
+BaseModel <|-- SVMModel
+BaseModel <|-- RandomForestModel
+BaseModel <|-- DecisionTreeModel
+BaseModel <|-- NaiveBayesModel
+BaseModel <|-- LogisticRegressionModel
+BaseModel <|-- KNearestNeighborsModel
+
+Classifier <|-- SVMClassifier
+Classifier <|-- RandomForestClassifier
+Classifier <|-- DecisionTreeClassifier
+Classifier <|-- NaiveBayesClassifier
+Classifier <|-- LogisticRegressionClassifier
+Classifier <|-- KNearestNeighborsClassifier
+
+ClassificationContext *-- IClassificationStrategy
+
+SVMClassifier --> SVMModel
+RandomForestClassifier --> RandomForestModel
+DecisionTreeClassifier --> DecisionTreeModel
+NaiveBayesClassifier --> NaiveBayesModel
+LogisticRegressionClassifier --> LogisticRegressionModel
+KNearestNeighborsClassifier --> KNearestNeighborsModel
+
+@enduml

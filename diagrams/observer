@@ -1,0 +1,40 @@
+@startuml
+interface EmailClassificationObserver {
+    + update(ts, ic, classification: str): void
+}
+
+class ResultsDisplayer {
+    - info_logger: InfoLogger
+    - _display(ts, ic, classification: str): void
+    + update(ts, ic, classification: str): void
+}
+
+class StatisticsCollector {
+    - _label_1_stats: dict[str, int]
+    - _label_2_stats: dict[str, int]
+    - _label_3_stats: dict[str, int]
+    - _label_4_stats: dict[str, int]
+    - _unclassified: int
+    - _total_classifications: int
+    - info_logger: InfoLogger
+    - _update_stats(classification: str): void
+    + update(_, __, classification: str): void
+    + display_stats(): void
+}
+
+EmailClassificationObserver <|-- ResultsDisplayer
+EmailClassificationObserver <|-- StatisticsCollector
+
+class InfoLogger
+class PrefixLogger
+class IndentationDecorator
+
+ResultsDisplayer ..> InfoLogger : "uses"
+ResultsDisplayer ..> PrefixLogger : "uses"
+ResultsDisplayer ..> IndentationDecorator : "uses"
+
+StatisticsCollector ..> InfoLogger : "uses"
+StatisticsCollector ..> PrefixLogger : "uses"
+StatisticsCollector ..> IndentationDecorator : "uses"
+
+@enduml

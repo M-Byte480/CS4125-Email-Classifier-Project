@@ -1,0 +1,92 @@
+@startuml
+' AbstractLogger is the base abstract class
+abstract AbstractLogger {
+    +base_message: str
+    +log(message: str)
+}
+
+' Concrete implementation of AbstractLogger
+class BaseInfoLogger {
+    +log(message: str)
+}
+
+BaseInfoLogger --> AbstractLogger
+
+class InfoLogger {
+    +log(message: str)
+}
+
+InfoLogger --> BaseInfoLogger
+
+' Concrete implementation of AbstractLogger
+class BaseWarningLogger {
+    +log(message: str)
+}
+
+BaseWarningLogger --> AbstractLogger
+
+class WarningLogger {
+    +log(message: str)
+}
+
+WarningLogger --> BaseWarningLogger
+
+' Concrete implementation of AbstractLogger
+class BaseErrorLogger {
+    +log(message: str)
+}
+
+BaseErrorLogger --> AbstractLogger
+
+class ErrorLogger {
+    +log(message: str)
+}
+
+ErrorLogger --> BaseErrorLogger
+
+' Decorator interface extends AbstractLogger
+abstract ILoggerDecorator {
+    +logger: AbstractLogger
+    +log(message: str)
+}
+
+ILoggerDecorator --> AbstractLogger
+
+' Concrete implementation of ILoggerDecorator
+class BoldDecorator {
+    +log(message: str)
+}
+
+class ColourDecorator {
+    +log(message: str)
+}
+
+class IndentationDecorator {
+    +log(message: str)
+}
+
+
+class BackgroundDecorator {
+    +log(message: str)
+}
+
+
+class ItalicsDecorator {
+    +log(message: str)
+}
+
+
+class PrefixDecorator {
+    +log(message: str)
+}
+
+' Relationships between components
+ILoggerDecorator <-- AbstractLogger
+BoldDecorator --> ILoggerDecorator
+ColourDecorator --> ILoggerDecorator
+IndentationDecorator --> ILoggerDecorator
+BackgroundDecorator --> ILoggerDecorator
+ItalicsDecorator --> ILoggerDecorator
+PrefixDecorator --> ILoggerDecorator
+
+@enduml

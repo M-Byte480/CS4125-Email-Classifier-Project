@@ -1,0 +1,97 @@
+@startuml
+
+' Singleton Class
+class VectoriserManager {
+    - instance: VectoriserManager
+    + __new__(): DataProcessor
+}
+
+' Associated Class
+class DataProcessor {
+    + replace_nan_data_in_column(df, column: str): DataFrame
+    + renaming_cols(df): DataFrame
+    + de_duplication(df): DataFrame
+    + translate_data_frame(df): DataFrame
+    + remove_noise(df): DataFrame
+    + remove_nan_rows(X, y): Tuple[DataFrame, Series]
+    + fit_vectoriser(data): None
+    + vectorize_data(df): Tuple[DataFrame, Dict]
+    + vectorize_unclassified_data(df): DataFrame
+}
+
+' Singleton association
+VectoriserManager *-- DataProcessor
+
+' Main Class
+class Main {
+    + __init__(): None
+    + print_usage(logger): None
+    + main(args: List[str]): None
+}
+
+' Factory for ClassificationContext
+class ClassificationContextFactory {
+    + {static} create_context(strategy: str): ClassificationContext
+}
+
+' Observer Pattern Components
+interface EmailClassificationObserver {
+    + update(ts, ic, classification: str): void
+}
+
+class ResultsDisplayer {
+    + update(ts, ic, classification: str): void
+    - _display(ts, ic, classification: str): void
+}
+
+class StatisticsCollector {
+    + update(_, __, classification: str): void
+    + display_stats(): void
+}
+
+' Observers implement the observer interface
+EmailClassificationObserver <|-- ResultsDisplayer
+EmailClassificationObserver <|-- StatisticsCollector
+
+' Utility Classes
+class FileManager {
+    + exists_file(path: str): bool
+    + load_csv(path: str): DataFrame
+    + load_all_csvs_in_directory(directory: str): DataFrame
+    + save_csv(df, path: str): None
+}
+
+class Config {
+    + PREPROCESSED_DATA_PATH: str
+    + TRAINED_MODELS_DIR: str
+}
+
+class Utils {
+    + instantiate_all_models(): List[Model]
+    + train_models(models: List[Model], X, y): None
+    + get_best_model(models: List[Model], X, y): Model
+}
+
+class InfoLogger
+class PrefixLogger {
+    + log(message: str): None
+}
+class ErrorLogger {
+    + log(message: str): None
+}
+
+' Associations and dependencies
+Main ..> VectoriserManager : "uses"
+Main ..> ClassificationContextFactory : "uses"
+Main ..> FileManager : "uses"
+Main ..> Config : "uses"
+Main ..> Utils : "uses"
+Main ..> ResultsDisplayer : "uses"
+Main ..> StatisticsCollector : "uses"
+Main ..> InfoLogger : "logs info"
+Main ..> ErrorLogger : "logs errors"
+
+FileManager ..> DataProcessor : "uses"
+PrefixLogger ..> InfoLogger : "decorates"
+
+@enduml

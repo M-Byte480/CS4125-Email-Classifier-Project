@@ -1,0 +1,34 @@
+@startuml
+' Define OldTranslator class
+class OldTranslator {
+    + trans_to_en(texts: np.array): list
+}
+
+
+' Define DataProcessor class
+class DataProcessor {
+    - tfidfconverter: TfidfVectorizer
+    + fit_vectoriser(column_data)
+    + vectorize_data(data_frame): (np.array, dict)
+    + vectorize_unclassified_data(data_frame): np.array
+    + renaming_cols(data_frame: pd.DataFrame): pd.DataFrame
+    + de_duplication(data_frame: pd.DataFrame): pd.DataFrame
+    + replace_nan_data_in_column(data_frame: pd.DataFrame, column_name): pd.DataFrame
+    + remove_noise(data_frame: pd.DataFrame): pd.DataFrame
+    + remove_nan_rows(X: np.array, y: np.array): (np.array, np.array)
+    + translate_data_frame(data_frame: pd.DataFrame): pd.DataFrame
+    + trans_to_en(texts: list): list
+}
+
+' Define TranslatorAdaptor class
+class TranslatorAdaptor {
+    - texts: np.array
+    + __init__(texts: list)
+    + trans_to_en(): list
+}
+
+' Relationships
+OldTranslator <|-- TranslatorAdaptor
+DataProcessor --> TranslatorAdaptor : uses
+
+@enduml
